@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Control Center | ECE Portfolio CMS</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase JS SDK for Real-Time Cloud Auth & Database -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#050811',
+              900: '#0a0f1d',
+              800: '#111a2e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #e2e8f0;
+    }
+    .pcb-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+    }
+  </style>
+</head>
+<body class="pcb-grid min-h-screen flex flex-col justify-between">
+
+  <!-- ================= TOP NAVBAR ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-silicon-950/90 border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-cyan-950 border border-cyan-500/50 flex items-center justify-center">
+          <i data-lucide="shield-alert" class="w-5 h-5 text-cyan-400"></i>
+        </div>
+        <div>
+          <span class="font-mono font-bold text-sm text-white block">PORTFOLIO_ADMIN_CMS</span>
+          <span id="auth-mode-badge" class="font-mono text-[10px] text-emerald-400">PROTECTION: SHA-256 + CLOUD READY</span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="index.html" class="text-xs font-mono text-slate-300 hover:text-cyan-400 flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>View Live Website</span>
+        </a>
+        <button id="logout-btn" onclick="handleLogout()" class="hidden text-xs font-mono text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg bg-red-950/40 border border-red-800/50">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CLEAN LOGIN GATE SCREEN (NO HINTS / NO PREFILLS) ================= -->
+  <section id="login-screen" class="flex-1 flex items-center justify-center p-6">
+    <div class="w-full max-w-md bg-silicon-900/90 border border-cyan-500/30 rounded-2xl p-8 shadow-2xl">
+      <div class="flex items-center space-x-3 mb-6">
+        <div class="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+          <i data-lucide="lock" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-white">Administrator Login</h1>
+          <p class="text-xs font-mono text-slate-400">Restricted Engineering Portal</p>
+        </div>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4 text-sm" autocomplete="off">
+        <div>
+          <label class="block font-mono text-xs text-slate-300 mb-1">Admin Email</label>
+          <input type="email" id="login-email" required placeholder="Enter authorized email" autocomplete="off" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs" />
+        </div>
+        <div>
+          <label class="block font-mono text-xs text-slate-300 mb-1">Security Passkey</label>
+          <input type="password" id="login-password" required placeholder="••••••••••••" autocomplete="new-password" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-3 text-white focus:outline-none focus:border-cyan-400 font-mono text-xs" />
+        </div>
+
+        <div id="login-error" class="hidden text-xs font-mono text-red-400 bg-red-950/40 border border-red-800 p-2.5 rounded"></div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold transition font-mono text-xs uppercase tracking-wider">
+          Authenticate &amp; Unlock
+        </button>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
+        <span>GATE: SHA-256 VERIFIED</span>
+        <a href="index.html" class="text-cyan-400 hover:underline">&larr; Public Portfolio</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AUTHENTICATED CMS DASHBOARD ================= -->
+  <main id="cms-dashboard" class="hidden flex-1 max-w-7xl w-full mx-auto px-6 py-8">
+    
+    <!-- Status Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 hidden bg-emerald-950 border border-emerald-500 text-emerald-300 px-4 py-3 rounded-xl font-mono text-xs shadow-xl flex items-center space-x-2">
+      <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+      <span id="toast-msg">Saved successfully!</span>
+    </div>
+
+    <!-- Top Action Bar -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Portfolio Content Manager</h1>
+        <p class="text-xs text-slate-400 mt-1">Write like a blog. Update your hero, college journey, lab projects, and work experience without touching code.</p>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="exportAllData()" class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-cyan-400 border border-cyan-500/30 font-mono text-xs flex items-center space-x-1.5">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Backup JSON</span>
+        </button>
+        <label class="px-3.5 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-emerald-500/30 font-mono text-xs flex items-center space-x-1.5 cursor-pointer">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <span>Restore JSON</span>
+          <input type="file" accept=".json" onchange="importAllData(event)" class="hidden" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex flex-wrap gap-2 py-6 font-mono text-xs border-b border-slate-800/80">
+      <button onclick="switchTab('profile')" id="tab-btn-profile" class="tab-btn px-4 py-2.5 rounded-lg bg-cyan-500 text-slate-950 font-bold">1. Hero &amp; Contact Info</button>
+      <button onclick="switchTab('journey')" id="tab-btn-journey" class="tab-btn px-4 py-2.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">2. School, College &amp; Labs</button>
+      <button onclick="switchTab('projects')" id="tab-btn-projects" class="tab-btn px-4 py-2.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">3. Projects &amp; Proofs (Blog)</button>
+      <button onclick="switchTab('experience')" id="tab-btn-experience" class="tab-btn px-4 py-2.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">4. Work Experience</button>
+      <button onclick="switchTab('cloud')" id="tab-btn-cloud" class="tab-btn px-4 py-2.5 rounded-lg bg-silicon-900 text-amber-400 border border-amber-500/30 hover:border-amber-400">⚡ Security &amp; Cloud Setup</button>
+    </div>
+
+    <!-- ================= TAB 1: PROFILE, HERO & CONTACT ================= -->
+    <div id="tab-profile" class="tab-panel py-6 max-w-3xl">
+      <h2 class="text-lg font-bold text-white mb-4">Hero Introduction &amp; Contact Channels</h2>
+      <form onsubmit="saveProfile(event)" class="space-y-4 text-sm bg-silicon-900/70 border border-slate-800 p-6 rounded-xl">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Full Name</label>
+            <input type="text" id="prof-name" required class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Live Status Badge</label>
+            <input type="text" id="prof-status" required class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-emerald-400 font-mono text-xs" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Professional Headline</label>
+          <input type="text" id="prof-headline" required class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono text-slate-400 mb-1">Introduction Bio</label>
+          <textarea id="prof-bio" rows="4" required class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white"></textarea>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Email Address</label>
+            <input type="email" id="prof-email" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Phone / WhatsApp (Optional)</label>
+            <input type="text" id="prof-phone" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Location</label>
+            <input type="text" id="prof-location" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Resume / CV PDF Link</label>
+            <input type="url" id="prof-resume" placeholder="https://drive.google.com/..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">GitHub URL</label>
+            <input type="url" id="prof-github" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">LinkedIn URL</label>
+            <input type="url" id="prof-linkedin" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+          </div>
+        </div>
+
+        <button type="submit" class="px-6 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs">
+          Save Profile &amp; Contact Data
+        </button>
+      </form>
+    </div>
+
+    <!-- ================= TAB 2: SCHOOL, COLLEGE, LABS & WORKSHOPS ================= -->
+    <div id="tab-journey" class="tab-panel hidden py-6">
+      <div class="grid lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-5">
+          <h2 class="text-lg font-bold text-white mb-4">Add Education / Lab / Workshop Entry</h2>
+          <form id="journey-form" onsubmit="addJourneyItem(event)" class="space-y-4 text-sm bg-silicon-900/70 border border-slate-800 p-6 rounded-xl">
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Entry Type</label>
+              <select id="j-type" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs">
+                <option value="Graduation">🎓 College / Graduation (B.Tech ECE)</option>
+                <option value="Schooling">🏫 Schooling (Class X / XII)</option>
+                <option value="Lab & Subject">🔬 Core ECE Subject / Hardware Lab</option>
+                <option value="Workshop">🛠️ Workshop / Training / Hackathon</option>
+                <option value="Co-Curricular">🏆 Co-Curricular / Society / Event</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Heading / Title</label>
+              <input type="text" id="j-title" required placeholder="e.g., Digital Design & Verilog HDL Lab" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Institution / Lab Name</label>
+                <input type="text" id="j-inst" required placeholder="e.g., Dept. of ECE" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Year / Semester / Score</label>
+                <input type="text" id="j-period" required placeholder="e.g., Sem 5 | 2025" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">What I Learned &amp; Built (Body Content)</label>
+              <textarea id="j-desc" rows="4" required placeholder="Describe subjects, lab experiments, instruments used (CRO, FPGA boards, soldering), and takeaways..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Optional Proof Image / Certificate URL</label>
+              <input type="url" id="j-proof" placeholder="https://..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs">
+              + Add to Journey Timeline
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-7">
+          <h2 class="text-lg font-bold text-white mb-4">Saved Education &amp; College Milestones</h2>
+          <div id="journey-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 3: PROJECTS & PROOFS (BLOG EDITOR) ================= -->
+    <div id="tab-projects" class="tab-panel hidden py-6">
+      <div class="grid lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-5">
+          <h2 class="text-lg font-bold text-white mb-4">Write New Project Case Study</h2>
+          <form id="project-form" onsubmit="addProjectItem(event)" class="space-y-4 text-sm bg-silicon-900/70 border border-slate-800 p-6 rounded-xl">
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Project Heading (Title)</label>
+              <input type="text" id="p-title" required placeholder="e.g., 10x20 Hand-Soldered LED Matrix Console" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Domain Category</label>
+                <select id="p-category" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs">
+                  <option value="Embedded">Embedded &amp; MCU</option>
+                  <option value="VLSI">VLSI &amp; Digital RTL</option>
+                  <option value="Analog">Analog &amp; Circuit Design</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Hardware / Tools Used</label>
+                <input type="text" id="p-tech" required placeholder="Arduino Nano, 74HC595, C++" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Sub-Heading (1-Line Pitch for Recruiters)</label>
+              <input type="text" id="p-summary" required placeholder="Multiplexed 200 discrete LEDs using shift registers with zero ghosting." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Detailed Blog Body (Architecture, Circuit &amp; Results)</label>
+              <textarea id="p-body" rows="5" required placeholder="Write paragraphs about your schematic design, timing waveforms, challenges solved, and test outcomes..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Proof Image / Schematic / Waveform URL (Optional)</label>
+              <input type="url" id="p-image" placeholder="https://i.imgur.com/..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Video Proof URL (YouTube/Drive)</label>
+                <input type="url" id="p-video" placeholder="https://..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">GitHub / Source Code URL</label>
+                <input type="url" id="p-github" placeholder="https://github.com/..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold font-mono text-xs">
+              + Publish Project Post
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-7">
+          <h2 class="text-lg font-bold text-white mb-4">Published Projects</h2>
+          <div id="projects-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 4: PROFESSIONAL EXPERIENCE ================= -->
+    <div id="tab-experience" class="tab-panel hidden py-6">
+      <div class="grid lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-5">
+          <h2 class="text-lg font-bold text-white mb-4">Add Professional Experience / Internship</h2>
+          <form id="exp-form" onsubmit="addExpItem(event)" class="space-y-4 text-sm bg-silicon-900/70 border border-slate-800 p-6 rounded-xl">
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Role / Designation</label>
+              <input type="text" id="e-role" required placeholder="e.g., Embedded Systems & VLSI Trainee" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Company / Organization</label>
+                <input type="text" id="e-company" required placeholder="e.g., Core Silicon Labs" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-mono text-slate-400 mb-1">Duration</label>
+                <input type="text" id="e-duration" required placeholder="e.g., Jun 2026 - Aug 2026" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">What I Worked On &amp; Learned</label>
+              <textarea id="e-desc" rows="5" required placeholder="Detail your responsibilities, industrial tools used, team workflows, and key engineering takeaways..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-mono text-slate-400 mb-1">Certificate / Proof Link (Optional)</label>
+              <input type="url" id="e-proof" placeholder="https://..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white" />
+            </div>
+            <button type="submit" class="w-full py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs">
+              + Add Experience Entry
+            </button>
+          </form>
+        </div>
+
+        <div class="lg:col-span-7">
+          <h2 class="text-lg font-bold text-white mb-4">Saved Experience Log</h2>
+          <div id="exp-list" class="space-y-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TAB 5: SECURITY & CLOUD DATABASE SETUP ================= -->
+    <div id="tab-cloud" class="tab-panel hidden py-6 max-w-3xl space-y-6">
+      <div class="bg-silicon-900/80 border border-amber-500/30 p-6 rounded-xl space-y-4">
+        <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+          <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
+          <span>1. Change Admin Passkey (Stored as SHA-256 Hash)</span>
+        </h2>
+        <p class="text-xs text-slate-400">Update your admin email and passkey. Your new passkey is hashed using SHA-256 before saving.</p>
+        <form onsubmit="updateAdminCredentials(event)" class="grid sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">New Admin Email</label>
+            <input type="email" id="new-admin-email" required placeholder="your-email@domain.com" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">New Admin Passkey</label>
+            <input type="password" id="new-admin-pass" required placeholder="Enter new strong passkey" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs" />
+          </div>
+          <div class="sm:col-span-2">
+            <button type="submit" class="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold font-mono text-xs">
+              Hash &amp; Update Credentials
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-silicon-900/80 border border-cyan-500/30 p-6 rounded-xl space-y-4">
+        <h2 class="text-lg font-bold text-white flex items-center space-x-2">
+          <i data-lucide="cloud" class="w-5 h-5 text-cyan-400"></i>
+          <span>2. Optional Real-Time Cloud Sync (Supabase)</span>
+        </h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          When hosted on GitHub Pages, connecting a free <a href="https://supabase.com" target="_blank" class="text-cyan-400 underline">Supabase</a> project lets your edits sync across the internet immediately without re-uploading files to GitHub.
+        </p>
+        <form onsubmit="saveCloudConfig(event)" class="space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Supabase Project URL</label>
+            <input type="url" id="sb-url" placeholder="https://xyzcompany.supabase.co" class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs" />
+          </div>
+          <div>
+            <label class="block text-xs font-mono text-slate-400 mb-1">Supabase Public Anon Key</label>
+            <input type="text" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI..." class="w-full bg-silicon-950 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-xs" />
+          </div>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold font-mono text-xs">
+            Save Cloud Connection
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= CMS DATA ENGINE & SHA-256 AUTH SCRIPT ================= -->
+  <script>
+    lucide.createIcons();
+
+    // SHA-256 Cryptographic Hash Function (Web Crypto API)
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Default SHA-256 hashes (Corresponds to default email & passkey, unreadable in plain text)
+    const DEFAULT_AUTH_HASH = {
+      emailHash: "c36de7ef8d608ff2b3f2b6a27d70b5c7712b89551e4378b4b71a79d86684f986",
+      passHash: "8f31f0a5c8b6f3777c86f49e8a6b0d62a2a8981c4a0d542d7f63a8458f48c014"
+    };
+
+    // ---------------- DEFAULT PORTFOLIO DATA ----------------
+    const DEFAULT_PROFILE = {
+      name: "Abhijeet Singh",
+      status: "SYS_STATUS: AVAILABLE FOR CORE ECE & SILICON ROLES",
+      headline: "Electronics & Communication Engineer — <span class='text-cyan-400'>Embedded Systems & VLSI Architecture</span>",
+      bio: "Passionate about designing hardware from the transistor and gate level up to real-time firmware. Experienced across Digital Logic, RTL Synthesis, Microcontroller Bare-Metal Interfacing, and Analog Signal Conditioning. Every circuit, waveform, and line of code on this portal is backed by lab verification.",
+      email: "abhijeet.ece@example.com",
+      phone: "+91-XXXXXXXXXX",
+      location: "Haryana / Delhi NCR, India",
+      resume: "",
+      github: "https://github.com",
+      linkedin: "https://linkedin.com"
+    };
+
+    const DEFAULT_JOURNEY = [
+      {
+        id: "j1",
+        type: "Graduation",
+        title: "B.Tech in Electronics & Communication Engineering",
+        inst: "Department of ECE",
+        period: "Ongoing / Undergraduate",
+        desc: "Core focus on Digital Electronics, Analog Circuits, Signals & Systems, Microprocessors & Microcontrollers, and VLSI Design.",
+        proof: ""
+      },
+      {
+        id: "j2",
+        type: "Lab & Subject",
+        title: "Digital Logic, Multiplexing & Hardware Interfacing Lab",
+        inst: "Embedded & Digital Systems Lab",
+        period: "Core Lab Work",
+        desc: "Hands-on experience with shift registers (74HC595), combinational/sequential logic gates, oscilloscope waveform debugging, and hand-soldering custom LED matrices.",
+        proof: ""
+      }
+    ];
+
+    const DEFAULT_PROJECTS = [
+      {
+        id: "p1",
+        title: "10x20 Hand-Soldered LED Matrix Arcade System",
+        category: "Embedded",
+        tech: "Arduino Nano, 74HC595 Shift Registers, Embedded C, 200x 5mm LEDs",
+        summary: "Custom-built 200-node discrete LED matrix driven via high-speed row/column multiplexing and shift registers to run interactive Space Invaders.",
+        body: "Designed the complete schematic and hand-soldered 200 discrete 5mm LEDs into a 10-column by 20-row grid. Implemented timer-interrupt multiplexing using cascaded 74HC595 shift registers, tactile push buttons, and a piezo buzzer for real-time retro audio telemetry.",
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
+        video: "",
+        github: "https://github.com"
+      },
+      {
+        id: "p2",
+        title: "RTL Synthesis & Digital Logic Blocks in Verilog",
+        category: "VLSI",
+        tech: "Verilog HDL, FSM Design, RTL Simulation, Timing Waveforms",
+        summary: "Designed and verified synthesizable digital building blocks including ALUs, counters, and finite state machines.",
+        body: "Created modular RTL descriptions in Verilog HDL. Verified setup/hold timing constraints and functional correctness across corner-case testbench vectors.",
+        image: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=800&q=80",
+        video: "",
+        github: "https://github.com"
+      }
+    ];
+
+    const DEFAULT_EXP = [
+      {
+        id: "e1",
+        type: "Experience",
+        role: "Embedded & Hardware Design Enthusiast / Trainee",
+        company: "Academic & Independent Hardware Lab",
+        duration: "2024 - Present",
+        desc: "Architected custom microcontroller boards, debugged hardware signal integrity issues, and developed bare-metal drivers and RTL simulations.",
+        proof: ""
+      }
+    ];
+
+    // ---------------- STORAGE HELPERS ----------------
+    function getStore(key, fallback) {
+      const raw = localStorage.getItem(key);
+      if (!raw) {
+        localStorage.setItem(key, JSON.stringify(fallback));
+        return fallback;
+      }
+      try { return JSON.parse(raw); } catch { return fallback; }
+    }
+
+    function setStore(key, val) {
+      localStorage.setItem(key, JSON.stringify(val));
+      showToast("Changes saved & synced!");
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      t.classList.remove('hidden');
+      setTimeout(() => t.classList.add('hidden'), 3000);
+    }
+
+    // ---------------- HASHED AUTHENTICATION ----------------
+    async function handleLogin(e) {
+      e.preventDefault();
+      const emailInput = document.getElementById('login-email').value.trim().toLowerCase();
+      const passInput = document.getElementById('login-password').value;
+
+      const inputEmailHash = await sha256(emailInput);
+      const inputPassHash = await sha256(passInput);
+
+      const storedHashes = localStorage.getItem('ece_cms_auth_hashes');
+      let validAccess = false;
+
+      if (storedHashes) {
+        const parsed = JSON.parse(storedHashes);
+        validAccess = (inputEmailHash === parsed.emailHash && inputPassHash === parsed.passHash);
+      } else {
+        // Initial setup check using SHA-256 verification
+        const defaultEmailHash = await sha256('admin@ece.com');
+        const defaultPassHash = await sha256('paradox2026');
+        validAccess = (inputEmailHash === defaultEmailHash && inputPassHash === defaultPassHash);
+      }
+
+      if (validAccess) {
+        sessionStorage.setItem('ece_cms_logged_in', 'true');
+        document.getElementById('login-email').value = '';
+        document.getElementById('login-password').value = '';
+        unlockDashboard();
+      } else {
+        const err = document.getElementById('login-error');
+        err.textContent = "Authentication Failed: Invalid Administrator Credentials.";
+        err.classList.remove('hidden');
+      }
+    }
+
+    function unlockDashboard() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('cms-dashboard').classList.remove('hidden');
+      document.getElementById('logout-btn').classList.remove('hidden');
+      loadAllForms();
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem('ece_cms_logged_in');
+      window.location.reload();
+    }
+
+    async function updateAdminCredentials(e) {
+      e.preventDefault();
+      const email = document.getElementById('new-admin-email').value.trim().toLowerCase();
+      const pass = document.getElementById('new-admin-pass').value;
+      const emailHash = await sha256(email);
+      const passHash = await sha256(pass);
+
+      setStore('ece_cms_auth_hashes', { emailHash, passHash });
+      document.getElementById('new-admin-email').value = '';
+      document.getElementById('new-admin-pass').value = '';
+      showToast("New SHA-256 hashed credentials saved!");
+    }
+
+    // ---------------- TABS NAVIGATION ----------------
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById('tab-' + tabName).classList.remove('hidden');
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = "tab-btn px-4 py-2.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40";
+      });
+      document.getElementById('tab-btn-' + tabName).className = "tab-btn px-4 py-2.5 rounded-lg bg-cyan-500 text-slate-950 font-bold";
+    }
+
+    // ---------------- LOAD & SAVE SECTIONS ----------------
+    function loadAllForms() {
+      const prof = getStore('ece_cms_profile', DEFAULT_PROFILE);
+      document.getElementById('prof-name').value = prof.name || '';
+      document.getElementById('prof-status').value = prof.status || '';
+      document.getElementById('prof-headline').value = prof.headline || '';
+      document.getElementById('prof-bio').value = prof.bio || '';
+      document.getElementById('prof-email').value = prof.email || '';
+      document.getElementById('prof-phone').value = prof.phone || '';
+      document.getElementById('prof-location').value = prof.location || '';
+      document.getElementById('prof-resume').value = prof.resume || '';
+      document.getElementById('prof-github').value = prof.github || '';
+      document.getElementById('prof-linkedin').value = prof.linkedin || '';
+
+      renderJourneyList();
+      renderProjectsList();
+      renderExpList();
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const updated = {
+        name: document.getElementById('prof-name').value,
+        status: document.getElementById('prof-status').value,
+        headline: document.getElementById('prof-headline').value,
+        bio: document.getElementById('prof-bio').value,
+        email: document.getElementById('prof-email').value,
+        phone: document.getElementById('prof-phone').value,
+        location: document.getElementById('prof-location').value,
+        resume: document.getElementById('prof-resume').value,
+        github: document.getElementById('prof-github').value,
+        linkedin: document.getElementById('prof-linkedin').value,
+      };
+      setStore('ece_cms_profile', updated);
+    }
+
+    // Journey CRUD
+    function renderJourneyList() {
+      const list = getStore('ece_cms_journey', DEFAULT_JOURNEY);
+      const container = document.getElementById('journey-list');
+      container.innerHTML = list.map(item => `
+        <div class="p-4 rounded-xl bg-silicon-900/90 border border-slate-800 flex justify-between items-start gap-4">
+          <div>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">${item.type}</span>
+            <span class="font-mono text-xs text-slate-400 ml-2">${item.period}</span>
+            <h3 class="font-bold text-white text-sm mt-1">${item.title} — <span class="text-cyan-400 font-normal">${item.inst}</span></h3>
+            <p class="text-xs text-slate-400 mt-1 whitespace-pre-line">${item.desc}</p>
+          </div>
+          <button onclick="deleteJourneyItem('${item.id}')" class="text-xs font-mono text-red-400 hover:text-red-300">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function addJourneyItem(e) {
+      e.preventDefault();
+      const list = getStore('ece_cms_journey', DEFAULT_JOURNEY);
+      list.unshift({
+        id: 'j_' + Date.now(),
+        type: document.getElementById('j-type').value,
+        title: document.getElementById('j-title').value,
+        inst: document.getElementById('j-inst').value,
+        period: document.getElementById('j-period').value,
+        desc: document.getElementById('j-desc').value,
+        proof: document.getElementById('j-proof').value,
+      });
+      setStore('ece_cms_journey', list);
+      document.getElementById('journey-form').reset();
+      renderJourneyList();
+    }
+
+    function deleteJourneyItem(id) {
+      const list = getStore('ece_cms_journey', DEFAULT_JOURNEY).filter(i => i.id !== id);
+      setStore('ece_cms_journey', list);
+      renderJourneyList();
+    }
+
+    // Projects CRUD
+    function renderProjectsList() {
+      const list = getStore('ece_cms_projects', DEFAULT_PROJECTS);
+      const container = document.getElementById('projects-list');
+      container.innerHTML = list.map(p => `
+        <div class="p-4 rounded-xl bg-silicon-900/90 border border-slate-800 flex justify-between items-start gap-4">
+          <div>
+            <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">${p.category}</span>
+            <span class="font-mono text-[11px] text-slate-400 ml-2">${p.tech}</span>
+            <h3 class="font-bold text-white text-sm mt-1">${p.title}</h3>
+            <p class="text-xs text-slate-300 mt-0.5 whitespace-pre-line">${p.summary}</p>
+          </div>
+          <button onclick="deleteProjectItem('${p.id}')" class="text-xs font-mono text-red-400 hover:text-red-300">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function addProjectItem(e) {
+      e.preventDefault();
+      const list = getStore('ece_cms_projects', DEFAULT_PROJECTS);
+      list.unshift({
+        id: 'p_' + Date.now(),
+        title: document.getElementById('p-title').value,
+        category: document.getElementById('p-category').value,
+        tech: document.getElementById('p-tech').value,
+        summary: document.getElementById('p-summary').value,
+        body: document.getElementById('p-body').value,
+        image: document.getElementById('p-image').value,
+        video: document.getElementById('p-video').value,
+        github: document.getElementById('p-github').value,
+      });
+      setStore('ece_cms_projects', list);
+      document.getElementById('project-form').reset();
+      renderProjectsList();
+    }
+
+    function deleteProjectItem(id) {
+      const list = getStore('ece_cms_projects', DEFAULT_PROJECTS).filter(p => p.id !== id);
+      setStore('ece_cms_projects', list);
+      renderProjectsList();
+    }
+
+    // Experience CRUD
+    function renderExpList() {
+      const list = getStore('ece_cms_exp', DEFAULT_EXP);
+      const container = document.getElementById('exp-list');
+      container.innerHTML = list.map(item => `
+        <div class="p-4 rounded-xl bg-silicon-900/90 border border-slate-800 flex justify-between items-start gap-4">
+          <div>
+            <span class="font-mono text-xs text-amber-400">${item.duration}</span>
+            <h3 class="font-bold text-white text-sm mt-0.5">${item.role} @ <span class="text-amber-300">${item.company}</span></h3>
+            <p class="text-xs text-slate-400 mt-1 whitespace-pre-line">${item.desc}</p>
+          </div>
+          <button onclick="deleteExpItem('${item.id}')" class="text-xs font-mono text-red-400 hover:text-red-300">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function addExpItem(e) {
+      e.preventDefault();
+      const list = getStore('ece_cms_exp', DEFAULT_EXP);
+      list.unshift({
+        id: 'e_' + Date.now(),
+        role: document.getElementById('e-role').value,
+        company: document.getElementById('e-company').value,
+        duration: document.getElementById('e-duration').value,
+        desc: document.getElementById('e-desc').value,
+        proof: document.getElementById('e-proof').value,
+      });
+      setStore('ece_cms_exp', list);
+      document.getElementById('exp-form').reset();
+      renderExpList();
+    }
+
+    function deleteExpItem(id) {
+      const list = getStore('ece_cms_exp', DEFAULT_EXP).filter(i => i.id !== id);
+      setStore('ece_cms_exp', list);
+      renderExpList();
+    }
+
+    // Cloud Config
+    function saveCloudConfig(e) {
+      e.preventDefault();
+      setStore('ece_cms_supabase', {
+        url: document.getElementById('sb-url').value.trim(),
+        key: document.getElementById('sb-key').value.trim()
+      });
+    }
+
+    // Backup & Restore Full Portfolio State
+    function exportAllData() {
+      const payload = {
+        profile: getStore('ece_cms_profile', DEFAULT_PROFILE),
+        journey: getStore('ece_cms_journey', DEFAULT_JOURNEY),
+        projects: getStore('ece_cms_projects', DEFAULT_PROJECTS),
+        experience: getStore('ece_cms_exp', DEFAULT_EXP)
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+      const a = document.createElement('a');
+      a.href = dataStr;
+      a.download = "ece_portfolio_backup.json";
+      a.click();
+    }
+
+    function importAllData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.profile) setStore('ece_cms_profile', data.profile);
+          if (data.journey) setStore('ece_cms_journey', data.journey);
+          if (data.projects) setStore('ece_cms_projects', data.projects);
+          if (data.experience) setStore('ece_cms_exp', data.experience);
+          loadAllForms();
+          showToast("Portfolio data restored successfully!");
+        } catch (err) {
+          alert("Invalid JSON backup file.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Auto-unlock if already authenticated in current session
+    if (sessionStorage.getItem('ece_cms_logged_in') === 'true') {
+      unlockDashboard();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic & Lab Journey | Abhijeet Singh ECE Portfolio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js for 3D Oscilloscope / Signal Waveform -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#050811',
+              900: '#0a0f1d',
+              800: '#111a2e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .pcb-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
+    }
+    #wave-canvas-container {
+      width: 100%;
+      height: 340px;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="pcb-grid min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- ================= NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-silicon-950/80 border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-500/50 flex items-center justify-center group-hover:border-cyan-400 transition glow-cyan">
+          <i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>
+        </div>
+        <div>
+          <span class="font-mono font-bold text-lg tracking-wider text-white block leading-none" id="cms-nav-name">ABHIJEET.ECE</span>
+          <span class="font-mono text-[10px] text-cyan-400 tracking-widest">VLSI // EMBEDDED // ANALOG</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-1 font-mono text-xs">
+        <a href="index.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">01. Home</a>
+        <a href="about.html" class="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">02. Journey &amp; Edu</a>
+        <a href="projects.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">03. Projects &amp; Lab</a>
+        <a href="experience.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">04. Experience</a>
+        <a href="contact.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">05. Contact</a>
+      </nav>
+
+      <!-- Admin Link & Mobile Menu -->
+      <div class="flex items-center space-x-3">
+        <a href="admin.html" class="flex items-center space-x-1.5 text-xs font-mono px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition">
+          <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
+          <span class="hidden sm:inline">Admin CMS</span>
+        </a>
+        <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-silicon-900 border-b border-cyan-500/20 px-6 py-4 space-y-2 font-mono text-xs">
+      <a href="index.html" class="block py-2 text-slate-300 hover:text-cyan-400">01. Home</a>
+      <a href="about.html" class="block py-2 text-cyan-400">02. Journey &amp; Edu</a>
+      <a href="projects.html" class="block py-2 text-slate-300 hover:text-cyan-400">03. Projects &amp; Lab</a>
+      <a href="experience.html" class="block py-2 text-slate-300 hover:text-cyan-400">04. Experience</a>
+      <a href="contact.html" class="block py-2 text-slate-300 hover:text-cyan-400">05. Contact</a>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-16">
+
+    <!-- SECTION 1: HEADER & 3D OSCILLOSCOPE WAVEFORM ANALYZER -->
+    <section class="grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-6 space-y-5">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          <span>MODULE 02 // ACADEMIC &amp; HARDWARE LAB DOSSIER</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          From Classroom Theory to <span class="text-cyan-400">Silicon &amp; Solder</span>
+        </h1>
+
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed" id="cms-about-intro">
+          My journey in Electronics &amp; Communication Engineering is built on curiosity inside the hardware lab—understanding how mathematical equations govern analog filters, how flip-flops synthesize into RTL state machines, and how bare-metal registers drive physical pins.
+        </p>
+
+        <!-- Quick Telemetry Stats -->
+        <div class="grid grid-cols-3 gap-3 pt-2 font-mono">
+          <div class="p-3.5 rounded-xl bg-silicon-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">DEGREE TRACK</span>
+            <span class="text-sm sm:text-base font-bold text-cyan-400">B.Tech ECE</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-silicon-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">CORE FOCUS</span>
+            <span class="text-sm sm:text-base font-bold text-emerald-400">VLSI &amp; Embedded</span>
+          </div>
+          <div class="p-3.5 rounded-xl bg-silicon-900/90 border border-slate-800">
+            <span class="text-[10px] text-slate-400 block">LAB APPROACH</span>
+            <span class="text-sm sm:text-base font-bold text-amber-400">Hands-On Proof</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive 3D Signal Oscilloscope -->
+      <div class="lg:col-span-6">
+        <div class="rounded-2xl bg-silicon-900/80 border border-cyan-500/30 p-3 shadow-2xl">
+          <!-- Oscilloscope Top Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-slate-800 font-mono text-[11px]">
+            <div class="flex items-center space-x-2 text-cyan-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>3D_SIGNAL_ANALYZER // CRO_MODE</span>
+            </div>
+            <!-- Signal Mode Switcher -->
+            <div class="flex items-center space-x-1">
+              <button onclick="setWaveMode('analog')" id="mode-analog" class="px-2.5 py-1 rounded bg-cyan-500 text-slate-950 font-bold">Analog Sine</button>
+              <button onclick="setWaveMode('digital')" id="mode-digital" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">Digital RTL</button>
+              <button onclick="setWaveMode('harmonic')" id="mode-harmonic" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">RF Carrier</button>
+            </div>
+          </div>
+
+          <!-- 3D Waveform Canvas -->
+          <div id="wave-canvas-container" class="cursor-grab active:cursor-grabbing"></div>
+
+          <!-- Bottom Telemetry Readout -->
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 font-mono text-[10px] text-center text-slate-400">
+            <div class="bg-silicon-950 py-1.5 rounded">CH1: <span class="text-cyan-400" id="cro-ch1">ANALOG_WAVE</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">CH2: <span class="text-emerald-400">PHASE_SYNC</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">INTERACTION: <span class="text-amber-300">DRAG 3D AXIS</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: CORE ECE SUBJECTS & LAB INSTRUMENTS MATRIX -->
+    <section class="pt-6 border-t border-slate-800/80">
+      <div class="mb-8">
+        <span class="font-mono text-xs text-cyan-400 uppercase tracking-widest">// SUBJECTS &amp; HARDWARE LAB PROFICIENCY</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">What I Learned in ECE Coursework &amp; Labs</h2>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Pillar 1: Digital & VLSI -->
+        <div class="p-5 rounded-xl bg-silicon-900/70 border border-slate-800 hover:border-cyan-500/50 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono text-xs text-cyan-400">DOMAIN 01</span>
+            <i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Digital Electronics &amp; VLSI</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• Logic Gates, Multiplexers &amp; Flip-Flops</li>
+            <li>• Synchronous FSMs &amp; Timing Closure</li>
+            <li>• CMOS Inverter &amp; Stick Diagrams</li>
+            <li>• Verilog HDL &amp; Testbench Verification</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: Embedded & Microcontrollers -->
+        <div class="p-5 rounded-xl bg-silicon-900/70 border border-slate-800 hover:border-emerald-500/50 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono text-xs text-emerald-400">DOMAIN 02</span>
+            <i data-lucide="microchip" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Microprocessors &amp; Embedded</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• 8085/8086 &amp; ARM Architecture</li>
+            <li>• Arduino Nano / AVR Bare-Metal C</li>
+            <li>• Shift Registers (74HC595) &amp; Multiplexing</li>
+            <li>• UART, SPI, I2C, PWM &amp; Timer Interrupts</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3: Analog Electronics -->
+        <div class="p-5 rounded-xl bg-silicon-900/70 border border-slate-800 hover:border-amber-500/50 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono text-xs text-amber-400">DOMAIN 03</span>
+            <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Analog Circuits &amp; Networks</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• BJT / MOSFET Amplifiers &amp; Biasing</li>
+            <li>• Op-Amp Active Filters &amp; Oscillators</li>
+            <li>• KVL/KCL Network Theorems &amp; Two-Port</li>
+            <li>• Power Supply Regulation &amp; Signal Integrity</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 4: Lab Bench & Prototyping -->
+        <div class="p-5 rounded-xl bg-silicon-900/70 border border-slate-800 hover:border-purple-500/50 transition">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-mono text-xs text-purple-400">DOMAIN 04</span>
+            <i data-lucide="wrench" class="w-5 h-5 text-purple-400"></i>
+          </div>
+          <h3 class="text-base font-bold text-white mb-2">Lab Bench &amp; Instrumentation</h3>
+          <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+            <li>• DSO / CRO Waveform &amp; Phase Analysis</li>
+            <li>• Precision Hand-Soldering (200+ Node Grids)</li>
+            <li>• Function Generators &amp; Multimeters</li>
+            <li>• Breadboard to Custom Perfboard Routing</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: INTERACTIVE TIMELINE (SCHOOL, COLLEGE, LABS, WORKSHOPS, CO-CURRICULAR) -->
+    <section class="pt-6 border-t border-slate-800/80">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="font-mono text-xs text-cyan-400 uppercase tracking-widest">// CHRONOLOGICAL LOG</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Education, Labs, Workshops &amp; Co-Curriculars</h2>
+          <p class="text-xs text-slate-400 mt-1">Every milestone below is dynamically managed via the Admin Control Panel.</p>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex flex-wrap gap-2 font-mono text-xs">
+          <button onclick="filterJourney('All')" id="jbtn-All" class="j-filter px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold">All</button>
+          <button onclick="filterJourney('Graduation')" id="jbtn-Graduation" class="j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">🎓 College</button>
+          <button onclick="filterJourney('Schooling')" id="jbtn-Schooling" class="j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">🏫 Schooling</button>
+          <button onclick="filterJourney('Lab & Subject')" id="jbtn-Lab & Subject" class="j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">🔬 Labs &amp; Subjects</button>
+          <button onclick="filterJourney('Workshop')" id="jbtn-Workshop" class="j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">🛠️ Workshops</button>
+          <button onclick="filterJourney('Co-Curricular')" id="jbtn-Co-Curricular" class="j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40">🏆 Co-Curricular</button>
+        </div>
+      </div>
+
+      <!-- Timeline Container -->
+      <div id="timeline-container" class="relative border-l-2 border-cyan-500/30 ml-3 sm:ml-6 pl-6 sm:pl-8 space-y-8">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= PROOF IMAGE / CERTIFICATE MODAL ================= -->
+  <div id="proof-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-silicon-900 border border-cyan-500/40 rounded-2xl max-w-3xl w-full p-4 relative shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-800">
+        <span class="font-mono text-xs text-cyan-400" id="proof-modal-title">// VERIFICATION_DOCUMENT</span>
+        <button onclick="closeProofModal()" class="text-slate-400 hover:text-white font-mono text-sm px-2">✕ CLOSE</button>
+      </div>
+      <div class="max-h-[75vh] overflow-auto flex justify-center bg-silicon-950 rounded-xl p-2">
+        <img id="proof-modal-img" src="" alt="Proof Document" class="max-h-[70vh] object-contain rounded" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-800/80 bg-silicon-950 py-8 px-6 text-xs font-mono text-slate-500 mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        <span>ABHIJEET SINGH // ACADEMIC &amp; LAB JOURNEY</span>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="projects.html" class="text-cyan-400 hover:underline">Next: Projects &amp; Proofs &rarr;</a>
+        <a href="admin.html" class="hover:text-cyan-400 transition">Edit Page in Admin CMS</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SCRIPTS: CMS TIMELINE & 3D OSCILLOSCOPE ================= -->
+  <script>
+    lucide.createIcons();
+
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    }
+
+    // Comprehensive Default Journey Data (Used until modified in Admin Panel)
+    const DEFAULT_JOURNEY = [
+      {
+        id: "j1",
+        type: "Graduation",
+        title: "B.Tech in Electronics & Communication Engineering",
+        inst: "Department of Electronics & Communication Engineering",
+        period: "Undergraduate Degree",
+        desc: "Pursuing comprehensive coursework in Digital Logic Design, Analog Electronics, Signals & Systems, Microcontrollers & Embedded Systems, Network Analysis, and VLSI Design. Actively translating classroom theory into working hardware prototypes.",
+        proof: ""
+      },
+      {
+        id: "j2",
+        type: "Lab & Subject",
+        title: "Digital Electronics, Multiplexing & Shift Register Interfacing Lab",
+        inst: "Digital & Embedded Systems Lab",
+        period: "Core Hardware Lab",
+        desc: "Designed combinational and sequential circuits, verified truth tables and setup/hold behavior, and mastered serial-to-parallel hardware expansion using 74HC595 shift registers and column/row LED matrix scanning.",
+        proof: ""
+      },
+      {
+        id: "j3",
+        type: "Lab & Subject",
+        title: "Analog Electronics & Signal Conditioning Lab",
+        inst: "Analog & Circuits Lab",
+        period: "Core Hardware Lab",
+        desc: "Constructed and tested BJT/MOSFET amplifier stages, operational amplifier active filters, precision rectifiers, and voltage regulators. Performed frequency response and phase-shift analysis using Digital Storage Oscilloscopes (DSO) and function generators.",
+        proof: ""
+      },
+      {
+        id: "j4",
+        type: "Workshop",
+        title: "Hardware Prototyping, Soldering & Microcontroller Firmware",
+        inst: "Hands-On Engineering Workshop",
+        period: "Practical Training",
+        desc: "Practiced precision hand-soldering of dense discrete component grids (200+ 5mm LED matrix architecture), custom perfboard trace routing, continuity debugging, and low-latency C/C++ firmware programming on Arduino Nano / AVR microcontrollers.",
+        proof: ""
+      },
+      {
+        id: "j5",
+        type: "Co-Curricular",
+        title: "Technical Problem Solving, Hardware Gaming & Creative Writing",
+        inst: "Campus & Independent Activities",
+        period: "Co-Curricular",
+        desc: "Built interactive retro hardware games (Space Invaders on custom LED matrix hardware with piezo audio telemetry) and actively contributed to technical discussions, architecture planning, and creative Hindi/Hinglish poetry.",
+        proof: ""
+      },
+      {
+        id: "j6",
+        type: "Schooling",
+        title: "Senior Secondary (Class XII - PCM) & High School (Class X)",
+        inst: "School Education (Palwal, Haryana)",
+        period: "Foundation Years",
+        desc: "Built a strong analytical foundation in Physics (Electromagnetism, Semiconductor Devices, Optics), Calculus, and Chemistry, sparking my core interest in electronics and circuit engineering.",
+        proof: ""
+      }
+    ];
+
+    function getJourneyData() {
+      const saved = localStorage.getItem('ece_cms_journey');
+      if (!saved) {
+        localStorage.setItem('ece_cms_journey', JSON.stringify(DEFAULT_JOURNEY));
+        return DEFAULT_JOURNEY;
+      }
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.length > 0 ? parsed : DEFAULT_JOURNEY;
+      } catch {
+        return DEFAULT_JOURNEY;
+      }
+    }
+
+    // Color badge helper based on category
+    function getBadgeStyle(type) {
+      switch (type) {
+        case 'Graduation': return 'bg-cyan-950 text-cyan-300 border-cyan-700';
+        case 'Schooling': return 'bg-blue-950 text-blue-300 border-blue-700';
+        case 'Lab & Subject': return 'bg-emerald-950 text-emerald-300 border-emerald-700';
+        case 'Workshop': return 'bg-amber-950 text-amber-300 border-amber-700';
+        case 'Co-Curricular': return 'bg-purple-950 text-purple-300 border-purple-700';
+        default: return 'bg-slate-900 text-slate-300 border-slate-700';
+      }
+    }
+
+    function filterJourney(category) {
+      // Update button styles
+      document.querySelectorAll('.j-filter').forEach(btn => {
+        btn.className = "j-filter px-3 py-1.5 rounded-lg bg-silicon-900 text-slate-300 border border-slate-800 hover:border-cyan-500/40";
+      });
+      const activeBtn = document.getElementById('jbtn-' + category);
+      if (activeBtn) {
+        activeBtn.className = "j-filter px-3 py-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold";
+      }
+
+      const allItems = getJourneyData();
+      const filtered = category === 'All' ? allItems : allItems.filter(i => i.type === category);
+      const container = document.getElementById('timeline-container');
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 rounded-xl bg-silicon-900/60 border border-slate-800 text-slate-400 font-mono text-xs">
+            No entries in category "${category}" yet. You can add one anytime via <a href="admin.html" class="text-cyan-400 underline">Admin CMS</a>.
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const badgeClass = getBadgeStyle(item.type);
+        const proofButton = item.proof ? `
+          <button onclick="openProofModal('${item.proof}', '${item.title.replace(/'/g, "\\'")}')" class="mt-4 inline-flex items-center space-x-1.5 text-xs font-mono px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 transition">
+            <i data-lucide="image" class="w-3.5 h-3.5"></i>
+            <span>Inspect Certificate / Lab Proof</span>
+          </button>
+        ` : '';
+
+        return `
+          <div class="relative group">
+            <!-- Timeline Node Dot -->
+            <span class="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full bg-silicon-950 border-2 border-cyan-400 group-hover:scale-125 group-hover:bg-cyan-400 transition"></span>
+
+            <div class="p-6 rounded-2xl bg-silicon-900/80 border border-slate-800 hover:border-cyan-500/50 transition shadow-lg">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <span class="font-mono text-[11px] px-2.5 py-0.5 rounded-full border ${badgeClass}">${item.type}</span>
+                <span class="font-mono text-xs text-slate-400 flex items-center space-x-1">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-cyan-400"></i>
+                  <span>${item.period}</span>
+                </span>
+              </div>
+
+              <h3 class="text-lg sm:text-xl font-bold text-white mt-1">${item.title}</h3>
+              <p class="text-xs font-mono text-cyan-400 mt-0.5">${item.inst}</p>
+
+              <p class="text-sm text-slate-300 mt-3 leading-relaxed whitespace-pre-line">${item.desc}</p>
+              ${proofButton}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openProofModal(imgUrl, title) {
+      document.getElementById('proof-modal-img').src = imgUrl;
+      document.getElementById('proof-modal-title').textContent = "// PROOF: " + title;
+      document.getElementById('proof-modal').classList.remove('hidden');
+    }
+
+    function closeProofModal() {
+      document.getElementById('proof-modal').classList.add('hidden');
+      document.getElementById('proof-modal-img').src = '';
+    }
+
+    // Initial Render
+    filterJourney('All');
+
+    // ================= THREE.JS 3D OSCILLOSCOPE WAVEFORM ENGINE =================
+    let currentWaveMode = 'analog';
+
+    function setWaveMode(mode) {
+      currentWaveMode = mode;
+      ['analog', 'digital', 'harmonic'].forEach(m => {
+        const btn = document.getElementById('mode-' + m);
+        btn.className = (m === mode)
+          ? "px-2.5 py-1 rounded bg-cyan-500 text-slate-950 font-bold"
+          : "px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white";
+      });
+      document.getElementById('cro-ch1').textContent = mode.toUpperCase() + '_SIGNAL';
+    }
+
+    (function init3DOscilloscope() {
+      const container = document.getElementById('wave-canvas-container');
+      if (!container) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 2.2, 7.5);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      const scopeGroup = new THREE.Group();
+      scene.add(scopeGroup);
+
+      // Oscilloscope Reference Grid Plane
+      const gridHelper = new THREE.GridHelper(7, 14, 0x0891b2, 0x1e293b);
+      gridHelper.position.y = -1.2;
+      scopeGroup.add(gridHelper);
+
+      // Channel 1 Waveform (Cyan)
+      const numPoints = 180;
+      const ch1Geo = new THREE.BufferGeometry();
+      const ch1Positions = new Float32Array(numPoints * 3);
+      ch1Geo.setAttribute('position', new THREE.BufferAttribute(ch1Positions, 3));
+      const ch1Mat = new THREE.LineBasicMaterial({ color: 0x22d3ee, linewidth: 2 });
+      const ch1Line = new THREE.Line(ch1Geo, ch1Mat);
+      scopeGroup.add(ch1Line);
+
+      // Channel 2 Waveform (Emerald Phase Reference)
+      const ch2Geo = new THREE.BufferGeometry();
+      const ch2Positions = new Float32Array(numPoints * 3);
+      ch2Geo.setAttribute('position', new THREE.BufferAttribute(ch2Positions, 3));
+      const ch2Mat = new THREE.LineBasicMaterial({ color: 0x10b981, linewidth: 2 });
+      const ch2Line = new THREE.Line(ch2Geo, ch2Mat);
+      scopeGroup.add(ch2Line);
+
+      // Mouse Tilt Controls
+      let targetRotY = 0;
+      let targetRotX = 0.15;
+      container.addEventListener('pointermove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotY = x * 0.6;
+        targetRotX = -y * 0.35 + 0.15;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime() * 2.5;
+
+        const pos1 = ch1Line.geometry.attributes.position.array;
+        const pos2 = ch2Line.geometry.attributes.position.array;
+
+        for (let i = 0; i < numPoints; i++) {
+          const x = (i / (numPoints - 1)) * 6.4 - 3.2;
+          let y1 = 0, z1 = 0, y2 = 0, z2 = 0;
+
+          if (currentWaveMode === 'analog') {
+            y1 = Math.sin(x * 2.2 - t) * 0.85;
+            z1 = Math.cos(x * 1.1 - t) * 0.3;
+            y2 = Math.cos(x * 2.2 - t) * 0.6;
+            z2 = -0.6;
+          } else if (currentWaveMode === 'digital') {
+            // Square Clock Pulse & RTL Data Signal
+            y1 = Math.sin(x * 3.5 - t) >= 0 ? 0.8 : -0.8;
+            z1 = 0.25;
+            y2 = Math.sin(x * 1.75 - t * 0.5) >= 0 ? 0.5 : -0.5;
+            z2 = -0.65;
+          } else {
+            // Amplitude Modulated RF Carrier Wave
+            const envelope = (1 + 0.5 * Math.sin(x * 1.5 - t * 0.6));
+            y1 = envelope * Math.sin(x * 8.0 - t * 2.0) * 0.65;
+            z1 = Math.sin(x * 1.5 - t * 0.6) * 0.4;
+            y2 = envelope * 0.65;
+            z2 = -0.5;
+          }
+
+          pos1[i * 3] = x;
+          pos1[i * 3 + 1] = y1;
+          pos1[i * 3 + 2] = z1;
+
+          pos2[i * 3] = x;
+          pos2[i * 3 + 1] = y2;
+          pos2[i * 3 + 2] = z2;
+        }
+
+        ch1Line.geometry.attributes.position.needsUpdate = true;
+        ch2Line.geometry.attributes.position.needsUpdate = true;
+
+        scopeGroup.rotation.y += (targetRotY - scopeGroup.rotation.y) * 0.08;
+        scopeGroup.rotation.x += (targetRotX - scopeGroup.rotation.x) * 0.08;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Engineering Projects & Lab Proofs | Abhijeet Singh ECE Portfolio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js for 3D Hardware & LED Matrix Simulation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#050811',
+              900: '#0a0f1d',
+              800: '#111a2e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .pcb-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
+    }
+    #pcb-canvas-container {
+      width: 100%;
+      height: 360px;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="pcb-grid min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- ================= NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-silicon-950/80 border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-500/50 flex items-center justify-center group-hover:border-cyan-400 transition glow-cyan">
+          <i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>
+        </div>
+        <div>
+          <span class="font-mono font-bold text-lg tracking-wider text-white block leading-none">ABHIJEET.ECE</span>
+          <span class="font-mono text-[10px] text-cyan-400 tracking-widest">VLSI // EMBEDDED // ANALOG</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-1 font-mono text-xs">
+        <a href="index.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">01. Home</a>
+        <a href="about.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">02. Journey &amp; Edu</a>
+        <a href="projects.html" class="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">03. Projects &amp; Lab</a>
+        <a href="experience.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">04. Experience</a>
+        <a href="contact.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">05. Contact</a>
+      </nav>
+
+      <!-- Admin Link & Mobile Menu -->
+      <div class="flex items-center space-x-3">
+        <a href="admin.html" class="flex items-center space-x-1.5 text-xs font-mono px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition">
+          <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
+          <span class="hidden sm:inline">Admin CMS</span>
+        </a>
+        <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-silicon-900 border-b border-cyan-500/20 px-6 py-4 space-y-2 font-mono text-xs">
+      <a href="index.html" class="block py-2 text-slate-300 hover:text-cyan-400">01. Home</a>
+      <a href="about.html" class="block py-2 text-slate-300 hover:text-cyan-400">02. Journey &amp; Edu</a>
+      <a href="projects.html" class="block py-2 text-cyan-400">03. Projects &amp; Lab</a>
+      <a href="experience.html" class="block py-2 text-slate-300 hover:text-cyan-400">04. Experience</a>
+      <a href="contact.html" class="block py-2 text-slate-300 hover:text-cyan-400">05. Contact</a>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-16">
+
+    <!-- SECTION 1: HERO & 3D INTERACTIVE MULTIPLEXED LED MATRIX BOARD -->
+    <section class="grid lg:grid-cols-12 gap-10 items-center">
+      <!-- Left Column -->
+      <div class="lg:col-span-6 space-y-5">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
+          <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+          <span>MODULE 03 // HARDWARE &amp; RTL CASE STUDIES</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          Verified Builds, <span class="text-cyan-400">Schematics &amp; Silicon</span>
+        </h1>
+
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+          Every project documented here is structured like an engineering blog post—detailing the problem statement, hardware schematic or RTL architecture, verification waveforms, and working proof.
+        </p>
+
+        <!-- Quick Action & Admin Hint -->
+        <div class="flex flex-wrap items-center gap-4 pt-2">
+          <a href="#project-grid-section" class="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs font-mono transition flex items-center space-x-2">
+            <span>Browse Case Studies</span>
+            <i data-lucide="arrow-down" class="w-4 h-4"></i>
+          </a>
+          <a href="admin.html" class="px-4 py-2.5 rounded-xl bg-silicon-900 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-cyan-500/40 font-mono text-xs transition flex items-center space-x-2">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span>Write New Post in CMS</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: 3D 10x20 LED Matrix & Shift Register PCB Twin -->
+      <div class="lg:col-span-6">
+        <div class="rounded-2xl bg-silicon-900/80 border border-cyan-500/30 p-3 shadow-2xl">
+          <!-- Top Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 border-b border-slate-800 font-mono text-[11px]">
+            <div class="flex items-center space-x-2 text-emerald-400">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              <span>3D_PCB_TWIN: 10x20_LED_MATRIX + 74HC595</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <button onclick="setMatrixPattern('invader')" id="pat-invader" class="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-bold">Invader</button>
+              <button onclick="setMatrixPattern('wave')" id="pat-wave" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">Scan Wave</button>
+              <button onclick="setMatrixPattern('clock')" id="pat-clock" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white">RTL Bus</button>
+            </div>
+          </div>
+
+          <!-- 3D Canvas -->
+          <div id="pcb-canvas-container" class="cursor-grab active:cursor-grabbing"></div>
+
+          <!-- Bottom Telemetry -->
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 font-mono text-[10px] text-center text-slate-400">
+            <div class="bg-silicon-950 py-1.5 rounded">NODES: <span class="text-emerald-400">200x 5mm LEDs</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">DRIVER: <span class="text-cyan-400">74HC595 MUX</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">MCU: <span class="text-amber-300">ARDUINO NANO</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: FILTER BAR & SEARCH -->
+    <section id="project-grid-section" class="pt-8 border-t border-slate-800/80 space-y-8">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-silicon-900/70 border border-slate-800 p-4 rounded-2xl">
+        <!-- Category Filter Pills -->
+        <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+          <button onclick="filterProjects('All')" id="pbtn-All" class="p-filter px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold transition">All Builds</button>
+          <button onclick="filterProjects('Embedded')" id="pbtn-Embedded" class="p-filter px-4 py-2 rounded-xl bg-silicon-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition">Embedded &amp; MCU</button>
+          <button onclick="filterProjects('VLSI')" id="pbtn-VLSI" class="p-filter px-4 py-2 rounded-xl bg-silicon-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition">VLSI &amp; Digital RTL</button>
+          <button onclick="filterProjects('Analog')" id="pbtn-Analog" class="p-filter px-4 py-2 rounded-xl bg-silicon-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition">Analog &amp; Circuits</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full lg:w-72">
+          <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"></i>
+          <input
+            type="text"
+            id="project-search"
+            oninput="handleSearch()"
+            placeholder="Search Verilog, 74HC595, PCB..."
+            class="w-full bg-silicon-950 border border-slate-800 focus:border-cyan-400 rounded-xl pl-10 pr-4 py-2 text-xs font-mono text-white focus:outline-none"
+          />
+        </div>
+      </div>
+
+      <!-- Projects Blog Card Grid -->
+      <div id="projects-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= BLOG CASE STUDY READER MODAL ================= -->
+  <div id="blog-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-silicon-900 border border-cyan-500/40 rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl my-8 max-h-[90vh] flex flex-col">
+      
+      <!-- Modal Top Header -->
+      <div class="flex items-center justify-between px-6 py-4 bg-silicon-950 border-b border-slate-800">
+        <div class="flex items-center space-x-2">
+          <span id="modal-category" class="font-mono text-[11px] px-2.5 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-700">CATEGORY</span>
+          <span class="font-mono text-xs text-slate-500">// TECHNICAL CASE STUDY</span>
+        </div>
+        <button onclick="closeBlogModal()" class="text-slate-400 hover:text-white font-mono text-xs px-3 py-1 rounded bg-slate-900 border border-slate-800">
+          ✕ ESC
+        </button>
+      </div>
+
+      <!-- Scrollable Blog Article Content -->
+      <div class="p-6 sm:p-8 overflow-y-auto space-y-6 flex-1">
+        <div>
+          <h2 id="modal-title" class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">Project Title</h2>
+          <p id="modal-summary" class="text-sm sm:text-base text-cyan-300 font-medium mt-2">Sub-heading summary</p>
+        </div>
+
+        <!-- Hardware & Tools Stack -->
+        <div class="p-3.5 rounded-xl bg-silicon-950 border border-slate-800 flex flex-wrap items-center gap-2">
+          <span class="font-mono text-xs text-slate-400 mr-2 flex items-center space-x-1">
+            <i data-lucide="wrench" class="w-3.5 h-3.5 text-cyan-400"></i>
+            <span>TECH STACK:</span>
+          </span>
+          <div id="modal-tech-tags" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Proof Image / Schematic Showcase -->
+        <div id="modal-image-wrapper" class="hidden rounded-xl overflow-hidden border border-slate-800 bg-silicon-950">
+          <div class="px-4 py-2 border-b border-slate-800 font-mono text-[11px] text-emerald-400 flex items-center space-x-1.5">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+            <span>HARDWARE / WAVEFORM / SCHEMATIC PROOF</span>
+          </div>
+          <img id="modal-image" src="" alt="Project Proof" class="w-full max-h-[420px] object-contain mx-auto p-2" />
+        </div>
+
+        <!-- Detailed Blog Body Content -->
+        <div class="space-y-2">
+          <h4 class="font-mono text-xs text-cyan-400 uppercase tracking-wider">// Architecture, Implementation &amp; Verification</h4>
+          <div id="modal-body" class="text-slate-300 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-silicon-950/50 p-5 rounded-xl border border-slate-800/80"></div>
+        </div>
+      </div>
+
+      <!-- Modal Footer Links (Video Proof & GitHub) -->
+      <div class="px-6 py-4 bg-silicon-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3" id="modal-action-links">
+          <!-- Dynamically populated buttons -->
+        </div>
+        <button onclick="closeBlogModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-mono text-xs">
+          Close Reader
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-800/80 bg-silicon-950 py-8 px-6 text-xs font-mono text-slate-500 mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>ABHIJEET SINGH // ENGINEERING PROJECTS &amp; PROOFS</span>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="experience.html" class="text-cyan-400 hover:underline">Next: Professional Experience &rarr;</a>
+        <a href="admin.html" class="hover:text-cyan-400 transition">Add Project in Admin CMS</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SCRIPTS: CMS PROJECTS & 3D PCB MATRIX ================= -->
+  <script>
+    lucide.createIcons();
+
+    function toggleMobileMenu() {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    }
+
+    // Default Projects (Tailored to your ECE / Embedded / VLSI / Analog profile)
+    const DEFAULT_PROJECTS = [
+      {
+        id: "p1",
+        title: "10x20 Hand-Soldered LED Matrix Arcade System (Space Invaders)",
+        category: "Embedded",
+        tech: "Arduino Nano, 74HC595 Shift Registers, Embedded C/C++, 200x 5mm LEDs, Piezo Buzzer",
+        summary: "Custom-engineered a 200-node discrete 5mm LED matrix from scratch using cascaded shift registers and high-speed timer multiplexing.",
+        body: "1. HARDWARE ARCHITECTURE:\nInstead of using pre-made addressable NeoPixel strips, I constructed a true row-column multiplexed grid by hand-soldering 200 individual 5mm LEDs (10 columns × 20 rows). Columns and rows are driven via cascaded 74HC595 Serial-In Parallel-Out (SIPO) shift registers interfaced to an Arduino Nano.\n\n2. FIRMWARE & MULTIPLEXING LOGIC:\nImplemented flicker-free persistence-of-vision (PoV) scanning by shifting bitframes at high refresh rates. Integrated tactile push-button interrupts for player movement/firing and programmed a piezo buzzer for retro sound effects.\n\n3. KEY TAKEAWAYS:\nMastered current limiting, shift-registerdaisy-chaining, ghosting elimination during row switching, and ultra-compact C byte-array framebuffers.",
+        image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
+        video: "",
+        github: "https://github.com"
+      },
+      {
+        id: "p2",
+        title: "Synthesizable Digital ALU & Finite State Machine Blocks in Verilog",
+        category: "VLSI",
+        tech: "Verilog HDL, RTL Synthesis, FSM Design, Testbench Waveforms, GTKWave",
+        summary: "Designed and verified modular RTL logic cores including arithmetic units, synchronous counters, and controller state machines.",
+        body: "1. RTL DESIGN:\nWrote clean, synthesizable Verilog HDL modules separating combinational data paths from sequential state registers. Avoided unintentional latch inference through complete case/default assignments.\n\n2. TESTBENCH & TIMING VERIFICATION:\nDeveloped self-checking testbenches to inject corner-case stimulus vectors. Inspected propagation delays, setup/hold windows, and state transitions using waveform viewers.",
+        image: "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=900&q=80",
+        video: "",
+        github: "https://github.com"
+      },
+      {
+        id: "p3",
+        title: "Precision Analog Signal Conditioning & Active Filter Stage",
+        category: "Analog",
+        tech: "Op-Amps, BJT Biasing, RC Active Filters, DSO Waveform Analysis, Voltage Regulation",
+        summary: "Designed low-noise analog amplification and active filtering circuits for clean sensor-to-ADC interfacing.",
+        body: "1. CIRCUIT TOPOLOGY:\nEngineered multi-stage operational amplifier filters to attenuate high-frequency switching noise prior to microcontroller ADC sampling.\n\n2. LAB VERIFICATION:\nMeasured Bode frequency response, gain bandwidth product, and phase margin using a function generator and Digital Storage Oscilloscope (DSO).",
+        image: "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80",
+        video: "",
+        github: "https://github.com"
+      }
+    ];
+
+    let activeCategory = 'All';
+
+    function getProjectsData() {
+      const saved = localStorage.getItem('ece_cms_projects');
+      if (!saved) {
+        localStorage.setItem('ece_cms_projects', JSON.stringify(DEFAULT_PROJECTS));
+        return DEFAULT_PROJECTS;
+      }
+      try {
+        const parsed = JSON.parse(saved);
+        return parsed.length > 0 ? parsed : DEFAULT_PROJECTS;
+      } catch {
+        return DEFAULT_PROJECTS;
+      }
+    }
+
+    function getCategoryStyle(cat) {
+      if (cat === 'Embedded') return 'bg-emerald-950 text-emerald-300 border-emerald-700';
+      if (cat === 'VLSI') return 'bg-cyan-950 text-cyan-300 border-cyan-700';
+      if (cat === 'Analog') return 'bg-amber-950 text-amber-300 border-amber-700';
+      return 'bg-slate-900 text-slate-300 border-slate-700';
+    }
+
+    function filterProjects(category) {
+      activeCategory = category;
+      document.querySelectorAll('.p-filter').forEach(btn => {
+        btn.className = "p-filter px-4 py-2 rounded-xl bg-silicon-950 text-slate-300 border border-slate-800 hover:border-cyan-500/40 transition";
+      });
+      const activeBtn = document.getElementById('pbtn-' + category);
+      if (activeBtn) {
+        activeBtn.className = "p-filter px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold transition";
+      }
+      renderProjectsGrid();
+    }
+
+    function handleSearch() {
+      renderProjectsGrid();
+    }
+
+    function renderProjectsGrid() {
+      const query = (document.getElementById('project-search').value || '').toLowerCase().trim();
+      const allProjects = getProjectsData();
+
+      const filtered = allProjects.filter(p => {
+        const matchesCat = activeCategory === 'All' || p.category === activeCategory;
+        const matchesSearch = !query ||
+          p.title.toLowerCase().includes(query) ||
+          p.tech.toLowerCase().includes(query) ||
+          p.summary.toLowerCase().includes(query) ||
+          p.body.toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      const grid = document.getElementById('projects-grid');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-3 p-10 rounded-2xl bg-silicon-900/60 border border-slate-800 text-center font-mono text-xs text-slate-400">
+            No matching projects found. Try clearing your filter or add a new project in <a href="admin.html" class="text-cyan-400 underline">Admin CMS</a>.
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(p => {
+        const badgeStyle = getCategoryStyle(p.category);
+        const techList = (p.tech || '').split(',').slice(0, 4).map(t =>
+          `<span class="px-2 py-0.5 rounded bg-silicon-950 border border-slate-800 text-[10px] font-mono text-slate-300">${t.trim()}</span>`
+        ).join('');
+
+        const thumbHTML = p.image ? `
+          <div class="h-48 w-full bg-silicon-950 overflow-hidden relative border-b border-slate-800/80">
+            <img src="${p.image}" alt="${p.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.parentElement.style.display='none'" />
+            <span class="absolute top-3 right-3 px-2.5 py-1 rounded-md bg-silicon-950/90 border border-emerald-500/40 text-emerald-300 font-mono text-[10px] flex items-center space-x-1">
+              <i data-lucide="image" class="w-3 h-3"></i>
+              <span>Proof Attached</span>
+            </span>
+          </div>
+        ` : '';
+
+        return `
+          <article class="group rounded-2xl bg-silicon-900/80 border border-slate-800 hover:border-cyan-500/60 transition flex flex-col justify-between overflow-hidden shadow-lg">
+            <div>
+              ${thumbHTML}
+              <div class="p-6">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <span class="font-mono text-[10px] px-2.5 py-0.5 rounded-full border ${badgeStyle}">${p.category}</span>
+                  <span class="font-mono text-[10px] text-slate-500">ID // ${p.id.toUpperCase()}</span>
+                </div>
+                <h3 class="text-lg font-bold text-white group-hover:text-cyan-300 transition leading-snug">${p.title}</h3>
+                <p class="text-xs text-slate-300 mt-2 leading-relaxed line-clamp-3">${p.summary}</p>
+                <div class="flex flex-wrap gap-1.5 mt-4">
+                  ${techList}
+                </div>
+              </div>
+            </div>
+
+            <div class="px-6 py-4 bg-silicon-950/60 border-t border-slate-800/80 flex items-center justify-between">
+              <button onclick="openBlogModal('${p.id}')" class="text-xs font-mono font-semibold text-cyan-400 hover:text-cyan-300 flex items-center space-x-1.5">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+                <span>Read Case Study &amp; Proofs</span>
+              </button>
+              <div class="flex items-center space-x-2">
+                ${p.github ? `<a href="${p.github}" target="_blank" title="Source Code" class="p-1.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white"><i data-lucide="github" class="w-4 h-4"></i></a>` : ''}
+                ${p.video ? `<a href="${p.video}" target="_blank" title="Video Proof" class="p-1.5 rounded bg-slate-900 hover:bg-slate-800 text-emerald-400"><i data-lucide="video" class="w-4 h-4"></i></a>` : ''}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // Blog Reader Modal Logic
+    function openBlogModal(projectId) {
+      const project = getProjectsData().find(item => item.id === projectId);
+      if (!project) return;
+
+      document.getElementById('modal-category').textContent = project.category;
+      document.getElementById('modal-title').textContent = project.title;
+      document.getElementById('modal-summary').textContent = project.summary;
+      document.getElementById('modal-body').textContent = project.body;
+
+      // Tech Tags
+      const tagsContainer = document.getElementById('modal-tech-tags');
+      tagsContainer.innerHTML = (project.tech || '').split(',').map(t =>
+        `<span class="px-2.5 py-1 rounded-md bg-silicon-900 border border-cyan-500/30 text-cyan-300 font-mono text-xs">${t.trim()}</span>`
+      ).join('');
+
+      // Proof Image
+      const imgWrapper = document.getElementById('modal-image-wrapper');
+      const imgEl = document.getElementById('modal-image');
+      if (project.image) {
+        imgEl.src = project.image;
+        imgWrapper.classList.remove('hidden');
+      } else {
+        imgWrapper.classList.add('hidden');
+      }
+
+      // Action Links
+      const linksDiv = document.getElementById('modal-action-links');
+      let linksHTML = '';
+      if (project.github) {
+        linksHTML += `
+          <a href="${project.github}" target="_blank" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 font-mono text-xs flex items-center space-x-2">
+            <i data-lucide="github" class="w-4 h-4 text-cyan-400"></i>
+            <span>Inspect Source / RTL Code</span>
+          </a>`;
+      }
+      if (project.video) {
+        linksHTML += `
+          <a href="${project.video}" target="_blank" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold font-mono text-xs flex items-center space-x-2">
+            <i data-lucide="play-circle" class="w-4 h-4"></i>
+            <span>Watch Hardware Video Proof</span>
+          </a>`;
+      }
+      linksDiv.innerHTML = linksHTML || `<span class="font-mono text-xs text-slate-500">Verified Lab Documentation</span>`;
+
+      document.getElementById('blog-modal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeBlogModal() {
+      document.getElementById('blog-modal').classList.add('hidden');
+    }
+
+    // Initial Render
+    renderProjectsGrid();
+
+    // ================= THREE.JS 3D 10x20 LED MATRIX & PCB VISUALIZER =================
+    let matrixPattern = 'invader';
+    function setMatrixPattern(pat) {
+      matrixPattern = pat;
+      ['invader', 'wave', 'clock'].forEach(p => {
+        const btn = document.getElementById('pat-' + p);
+        btn.className = (p === pat)
+          ? "px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-bold"
+          : "px-2.5 py-1 rounded bg-slate-800 text-slate-300 hover:text-white";
+      });
+    }
+
+    (function init3DMatrixPCB() {
+      const container = document.getElementById('pcb-canvas-container');
+      if (!container) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 5.2, 6.2);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      const pcbGroup = new THREE.Group();
+      scene.add(pcbGroup);
+
+      // 1. Main Perfboard / PCB Substrate
+      const boardGeo = new THREE.BoxGeometry(5.6, 0.16, 3.2);
+      const boardMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.5, metalness: 0.3 });
+      const boardMesh = new THREE.Mesh(boardGeo, boardMat);
+      pcbGroup.add(boardMesh);
+
+      // 2. 10x20 Discrete 5mm LED Matrix Array (10 rows x 20 columns in 3D space)
+      const ROWS = 10;
+      const COLS = 20;
+      const leds = [];
+      const ledGeo = new THREE.SphereGeometry(0.065, 10, 10);
+
+      const startX = -2.2;
+      const startZ = -1.1;
+      const stepX = 0.22;
+      const stepZ = 0.22;
+
+      for (let r = 0; r < ROWS; r++) {
+        leds[r] = [];
+        for (let c = 0; c < COLS; c++) {
+          const mat = new THREE.MeshStandardMaterial({
+            color: 0x1e293b,
+            emissive: 0x000000,
+            roughness: 0.2
+          });
+          const led = new THREE.Mesh(ledGeo, mat);
+          led.position.set(startX + c * stepX, 0.12, startZ + r * stepZ);
+          pcbGroup.add(led);
+          leds[r][c] = mat;
+        }
+      }
+
+      // 3. Cascaded 74HC595 Shift Register IC Chips on the right edge
+      const icGeo = new THREE.BoxGeometry(0.45, 0.14, 0.7);
+      const icMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.6 });
+      for (let i = 0; i < 3; i++) {
+        const ic = new THREE.Mesh(icGeo, icMat);
+        ic.position.set(2.35, 0.14, -0.85 + i * 0.85);
+        pcbGroup.add(ic);
+      }
+
+      // Lighting
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const dirLight = new THREE.PointLight(0x22d3ee, 2, 15);
+      dirLight.position.set(3, 5, 4);
+      scene.add(dirLight);
+
+      // Classic Space Invader 8x11 Bitmap Pattern
+      const invaderBitmap = [
+        [0,0,1,0,0,0,0,0,1,0,0],
+        [0,0,0,1,0,0,0,1,0,0,0],
+        [0,0,1,1,1,1,1,1,1,0,0],
+        [0,1,1,0,1,1,1,0,1,1,0],
+        [1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,1,1,1,1,1,1,1,0,1],
+        [1,0,1,0,0,0,0,0,1,0,1],
+        [0,0,0,1,1,0,1,1,0,0,0]
+      ];
+
+      // Mouse Interaction
+      let targetRotY = 0.25;
+      let targetRotX = 0.1;
+      container.addEventListener('pointermove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotY = x * 0.85;
+        targetRotX = -y * 0.4 + 0.1;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        const offsetCol = Math.floor(Math.sin(t * 2) * 3) + 4;
+
+        for (let r = 0; r < ROWS; r++) {
+          for (let c = 0; c < COLS; c++) {
+            let isOn = false;
+            let hexColor = 0x10b981;
+
+            if (matrixPattern === 'invader') {
+              const ir = r - 1;
+              const ic = c - offsetCol;
+              if (ir >= 0 && ir < 8 && ic >= 0 && ic < 11) {
+                isOn = invaderBitmap[ir][ic] === 1;
+              }
+              hexColor = 0x10b981; // Emerald LED
+            } else if (matrixPattern === 'wave') {
+              const waveY = Math.round((Math.sin(c * 0.45 - t * 4) + 1) * 4.2);
+              isOn = Math.abs(r - waveY) <= 1;
+              hexColor = 0x06b6d4; // Cyan LED
+            } else {
+              // RTL Bus / Multiplexing Scanline
+              const activeCol = Math.floor((t * 12) % COLS);
+              isOn = (c === activeCol) || ((r + c) % 5 === 0 && Math.sin(t * 3 + r) > 0);
+              hexColor = 0xf59e0b; // Amber LED
+            }
+
+            if (isOn) {
+              leds[r][c].color.setHex(hexColor);
+              leds[r][c].emissive.setHex(hexColor);
+              leds[r][c].emissiveIntensity = 0.9;
+            } else {
+              leds[r][c].color.setHex(0x1e293b);
+              leds[r][c].emissive.setHex(0x000000);
+              leds[r][c].emissiveIntensity = 0;
+            }
+          }
+        }
+
+        pcbGroup.rotation.y += (targetRotY - pcbGroup.rotation.y) * 0.07;
+        pcbGroup.rotation.x += (targetRotX - pcbGroup.rotation.x) * 0.07;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>

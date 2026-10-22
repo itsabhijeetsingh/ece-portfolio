@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact & Resume Dispatch | Abhijeet Singh ECE</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js for 3D Microchip Handshake Core -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#050811',
+              900: '#0a0f1d',
+              800: '#111a2e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .pcb-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+    }
+    .glow-purple {
+      box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+    }
+    #contact-canvas-container {
+      width: 100%;
+      height: 320px;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="pcb-grid min-h-screen flex flex-col justify-between selection:bg-purple-500 selection:text-slate-950">
+
+  <!-- ================= NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-silicon-950/80 border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-500/50 flex items-center justify-center group-hover:border-purple-400 transition">
+          <i data-lucide="cpu" class="w-5 h-5 text-purple-400"></i>
+        </div>
+        <div>
+          <span class="font-mono font-bold text-lg tracking-wider text-white block leading-none">ABHIJEET.ECE</span>
+          <span class="font-mono text-[10px] text-purple-400 tracking-widest">VLSI // EMBEDDED // ANALOG</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center space-x-1 font-mono text-xs">
+        <a href="index.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-purple-300 hover:bg-slate-900/60 transition">01. Home</a>
+        <a href="about.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-purple-300 hover:bg-slate-900/60 transition">02. Journey &amp; Edu</a>
+        <a href="projects.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-purple-300 hover:bg-slate-900/60 transition">03. Projects &amp; Lab</a>
+        <a href="experience.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-purple-300 hover:bg-slate-900/60 transition">04. Experience</a>
+        <a href="contact.html" class="px-4 py-2 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/30">05. Contact</a>
+      </nav>
+
+      <!-- Admin Link & Mobile Menu -->
+      <div class="flex items-center space-x-3">
+        <a href="admin.html" class="flex items-center space-x-1.5 text-xs font-mono px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-purple-400 text-slate-300 hover:text-purple-400 transition">
+          <i data-lucide="shield-check" class="w-4 h-4 text-purple-400"></i>
+          <span class="hidden sm:inline">Admin CMS</span>
+        </a>
+        <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-silicon-900 border-b border-cyan-500/20 px-6 py-4 space-y-2 font-mono text-xs">
+      <a href="index.html" class="block py-2 text-slate-300 hover:text-purple-400">01. Home</a>
+      <a href="about.html" class="block py-2 text-slate-300 hover:text-purple-400">02. Journey &amp; Edu</a>
+      <a href="projects.html" class="block py-2 text-slate-300 hover:text-purple-400">03. Projects &amp; Lab</a>
+      <a href="experience.html" class="block py-2 text-slate-300 hover:text-purple-400">04. Experience</a>
+      <a href="contact.html" class="block py-2 text-purple-400">05. Contact</a>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-16">
+
+    <!-- SECTION 1: HEADER & 3D HANDSHAKE CORE -->
+    <section class="grid lg:grid-cols-12 gap-10 items-center">
+      <div class="lg:col-span-6 space-y-5">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-950/80 border border-purple-500/30 text-purple-300 text-xs font-mono">
+          <i data-lucide="terminal" class="w-3.5 h-3.5"></i>
+          <span>MODULE 05 // RECRUITER HANDSHAKE &amp; DISPATCH</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+          Let's Build Reliable <span class="text-purple-400">Hardware &amp; Silicon</span> Together
+        </h1>
+
+        <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+          I am actively looking for core engineering roles and internships in Embedded Systems, RTL Design, VLSI Verification, and Hardware Prototyping. Connect with me directly below.
+        </p>
+
+        <!-- Resume Download Button -->
+        <div class="pt-2">
+          <a id="resume-download-btn" href="#" target="_blank" class="px-6 py-3.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-slate-950 font-bold text-xs font-mono transition inline-flex items-center space-x-2 glow-purple shadow-xl">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Download Verified Technical CV (PDF)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Column: 3D Handshake Core -->
+      <div class="lg:col-span-6">
+        <div class="rounded-2xl bg-silicon-900/80 border border-purple-500/30 p-3 shadow-2xl">
+          <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800 font-mono text-[11px] text-purple-400">
+            <span class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+              <span>COMM_CHANNEL: SECURE_SOCKET</span>
+            </span>
+            <span>READY FOR HANDSHAKE</span>
+          </div>
+
+          <div id="contact-canvas-container" class="cursor-grab active:cursor-grabbing"></div>
+
+          <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800 font-mono text-[10px] text-center text-slate-400">
+            <div class="bg-silicon-950 py-1.5 rounded">PROTOCOL: <span class="text-cyan-400">TCP / DIRECT</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">LOCATION: <span class="text-purple-300" id="display-loc">India</span></div>
+            <div class="bg-silicon-950 py-1.5 rounded">STATUS: <span class="text-emerald-400">ONLINE</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: CONTACT CARDS & CHANNELS -->
+    <section class="pt-8 border-t border-slate-800/80 grid md:grid-cols-3 gap-6">
+      
+      <!-- Email Card -->
+      <div class="p-6 rounded-2xl bg-silicon-900/80 border border-slate-800 hover:border-purple-500/50 transition flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4">
+            <i data-lucide="mail" class="w-5 h-5"></i>
+          </div>
+          <span class="font-mono text-xs text-purple-400">ELECTRONIC MAIL</span>
+          <h3 class="text-lg font-bold text-white mt-1" id="display-email">abhijeet.ece@example.com</h3>
+          <p class="text-xs text-slate-400 mt-2">Send project inquiries or interview schedules directly to my inbox.</p>
+        </div>
+        <a id="mail-to-link" href="#" class="mt-6 pt-3 border-t border-slate-800 text-xs font-mono text-purple-400 hover:underline flex items-center justify-between">
+          <span>Send Direct Message</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- LinkedIn Card -->
+      <div class="p-6 rounded-2xl bg-silicon-900/80 border border-slate-800 hover:border-cyan-500/50 transition flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4">
+            <i data-lucide="linkedin" class="w-5 h-5"></i>
+          </div>
+          <span class="font-mono text-xs text-cyan-400">PROFESSIONAL NETWORK</span>
+          <h3 class="text-lg font-bold text-white mt-1">LinkedIn Profile</h3>
+          <p class="text-xs text-slate-400 mt-2">Connect to review recommendations, endorsements, and career updates.</p>
+        </div>
+        <a id="linkedin-link" href="#" target="_blank" class="mt-6 pt-3 border-t border-slate-800 text-xs font-mono text-cyan-400 hover:underline flex items-center justify-between">
+          <span>Open LinkedIn</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- GitHub Card -->
+      <div class="p-6 rounded-2xl bg-silicon-900/80 border border-slate-800 hover:border-emerald-500/50 transition flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4">
+            <i data-lucide="github" class="w-5 h-5"></i>
+          </div>
+          <span class="font-mono text-xs text-emerald-400">SOURCE CODE REPOSITORY</span>
+          <h3 class="text-lg font-bold text-white mt-1">GitHub Repos</h3>
+          <p class="text-xs text-slate-400 mt-2">Inspect Verilog RTL cores, C firmware, and custom PCB schematics.</p>
+        </div>
+        <a id="github-link" href="#" target="_blank" class="mt-6 pt-3 border-t border-slate-800 text-xs font-mono text-emerald-400 hover:underline flex items-center justify-between">
+          <span>Open GitHub</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-800/80 bg-silicon-950 py-8 px-6 text-xs font-mono text-slate-500 mt-12">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+        <span>ABHIJEET SINGH // RECRUITER PORTFOLIO SYSTEM</span>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="index.html" class="text-purple-400 hover:underline">&larr; Back to Home</a>
+        <a href="admin.html" class="hover:text-purple-400 transition">Admin CMS</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script>
+    lucide.createIcons();
+    function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+
+    // Sync profile details from Admin CMS if saved
+    function loadContactCMS() {
+      const saved = localStorage.getItem('ece_cms_profile');
+      if (!saved) return;
+      try {
+        const p = JSON.parse(saved);
+        if (p.email) {
+          document.getElementById('display-email').textContent = p.email;
+          document.getElementById('mail-to-link').href = 'mailto:' + p.email;
+        }
+        if (p.location) document.getElementById('display-loc').textContent = p.location;
+        if (p.resume) document.getElementById('resume-download-btn').href = p.resume;
+        if (p.linkedin) document.getElementById('linkedin-link').href = p.linkedin;
+        if (p.github) document.getElementById('github-link').href = p.github;
+      } catch (e) {
+        console.error('Contact Sync Error:', e);
+      }
+    }
+    loadContactCMS();
+
+    // Three.js 3D Handshake Microchip Core
+    (function init3DContactCore() {
+      const container = document.getElementById('contact-canvas-container');
+      if (!container) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 2.5, 6.5);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      const group = new THREE.Group();
+      scene.add(group);
+
+      // Central Processor Die
+      const dieGeo = new THREE.BoxGeometry(2, 0.3, 2);
+      const dieMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.2, metalness: 0.8, emissive: 0x6b21a8, emissiveIntensity: 0.3 });
+      const die = new THREE.Mesh(dieGeo, dieMat);
+      group.add(die);
+
+      // Grid Pattern on Top
+      const grid = new THREE.GridHelper(1.8, 6, 0x22d3ee, 0xf43f5e);
+      grid.position.y = 0.16;
+      group.add(grid);
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const pLight = new THREE.PointLight(0xa855f7, 3, 12);
+      pLight.position.set(4, 4, 4);
+      scene.add(pLight);
+
+      let targetRotY = 0.3;
+      let targetRotX = 0.2;
+      container.addEventListener('pointermove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotY = x * 1.2;
+        targetRotX = -y * 0.5 + 0.2;
+      });
+
+      window.addEventListener('resize', () => {
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      const clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const t = clock.getElapsedTime();
+
+        group.rotation.y += (targetRotY + t * 0.2 - group.rotation.y) * 0.08;
+        group.rotation.x += (targetRotX - group.rotation.x) * 0.08;
+        group.position.y = Math.sin(t * 2) * 0.06;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>

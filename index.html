@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abhijeet Singh | ECE • Embedded & VLSI Portfolio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js for 3D Silicon Chip Rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            silicon: {
+              950: '#050811',
+              900: '#0a0f1d',
+              800: '#111a2e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #050811;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    /* Subtle PCB Trace Grid Background */
+    .pcb-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(6, 182, 212, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
+    }
+    .glow-cyan {
+      box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
+    }
+    #canvas-container {
+      width: 100%;
+      height: 460px;
+      position: relative;
+    }
+  </style>
+</head>
+<body class="pcb-grid min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- ================= NAVIGATION BAR ================= -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-silicon-950/80 border-b border-cyan-500/20">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <!-- Brand / Logo -->
+      <a href="index.html" class="flex items-center space-x-3 group">
+        <div class="w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-500/50 flex items-center justify-center group-hover:border-cyan-400 transition glow-cyan">
+          <i data-lucide="cpu" class="w-5 h-5 text-cyan-400"></i>
+        </div>
+        <div>
+          <span class="font-mono font-bold text-lg tracking-wider text-white block leading-none" id="cms-nav-name">ABHIJEET.ECE</span>
+          <span class="font-mono text-[10px] text-cyan-400 tracking-widest">VLSI // EMBEDDED // ANALOG</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-1 font-mono text-xs">
+        <a href="index.html" class="px-4 py-2 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">01. Home</a>
+        <a href="about.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">02. Journey &amp; Edu</a>
+        <a href="projects.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">03. Projects &amp; Lab</a>
+        <a href="experience.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">04. Experience</a>
+        <a href="contact.html" class="px-4 py-2 rounded-lg text-slate-400 hover:text-cyan-300 hover:bg-slate-900/60 transition">05. Contact</a>
+      </nav>
+
+      <!-- Admin Portal & Mobile Menu Button -->
+      <div class="flex items-center space-x-3">
+        <a href="admin.html" class="flex items-center space-x-1.5 text-xs font-mono px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-400 transition" title="Admin Control Panel">
+          <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
+          <span class="hidden sm:inline">Admin CMS</span>
+        </a>
+        <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden bg-silicon-900 border-b border-cyan-500/20 px-6 py-4 space-y-2 font-mono text-xs">
+      <a href="index.html" class="block py-2 text-cyan-400">01. Home</a>
+      <a href="about.html" class="block py-2 text-slate-300 hover:text-cyan-400">02. Journey &amp; Edu</a>
+      <a href="projects.html" class="block py-2 text-slate-300 hover:text-cyan-400">03. Projects &amp; Lab</a>
+      <a href="experience.html" class="block py-2 text-slate-300 hover:text-cyan-400">04. Experience</a>
+      <a href="contact.html" class="block py-2 text-slate-300 hover:text-cyan-400">05. Contact</a>
+    </div>
+  </header>
+
+  <!-- ================= HERO SECTION WITH 3D CANVAS ================= -->
+  <main class="flex-1">
+    <section class="max-w-7xl mx-auto px-6 pt-8 pb-16 lg:py-20">
+      <div class="grid lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Column: Bio & Call to Action (7 Cols) -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <!-- Live Telemetry Badge -->
+          <div class="inline-flex items-center space-x-2.5 px-3.5 py-1.5 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-300 text-xs font-mono">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 -ml-4"></span>
+            <span id="cms-hero-badge">SYS_STATUS: AVAILABLE FOR CORE ECE &amp; SILICON ROLES</span>
+          </div>
+
+          <div class="space-y-2">
+            <p class="font-mono text-cyan-400 text-sm tracking-wide" id="cms-hero-greeting">// HELLO WORLD, I AM</p>
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight" id="cms-hero-title">
+              Abhijeet Singh
+            </h1>
+            <h2 class="text-xl sm:text-2xl font-semibold text-slate-400" id="cms-hero-subtitle">
+              Electronics &amp; Communication Engineer — <span class="text-cyan-400">Embedded Systems &amp; VLSI Architecture</span>
+            </h2>
+          </div>
+
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl" id="cms-hero-bio">
+            Passionate about designing hardware from the transistor and gate level up to real-time firmware. Experienced across <span class="text-white font-medium">Digital Logic, RTL Synthesis, Microcontroller Bare-Metal Interfacing, and Analog Signal Conditioning</span>. Every circuit, waveform, and line of code on this portal is backed by lab verification.
+          </p>
+
+          <!-- Key Technical Pillars -->
+          <div class="grid grid-cols-3 gap-3 pt-2 max-w-xl font-mono">
+            <div class="p-3 rounded-lg bg-silicon-900/90 border border-slate-800">
+              <div class="text-cyan-400 text-xs">DOMAIN 01</div>
+              <div class="text-white font-bold text-sm mt-0.5">VLSI &amp; RTL</div>
+              <div class="text-slate-500 text-[11px]">Verilog • FPGA • CMOS</div>
+            </div>
+            <div class="p-3 rounded-lg bg-silicon-900/90 border border-slate-800">
+              <div class="text-emerald-400 text-xs">DOMAIN 02</div>
+              <div class="text-white font-bold text-sm mt-0.5">Embedded</div>
+              <div class="text-slate-500 text-[11px]">C/C++ • MCU • Protocols</div>
+            </div>
+            <div class="p-3 rounded-lg bg-silicon-900/90 border border-slate-800">
+              <div class="text-amber-400 text-xs">DOMAIN 03</div>
+              <div class="text-white font-bold text-sm mt-0.5">Analog &amp; PCB</div>
+              <div class="text-slate-500 text-[11px]">Sensors • Layout • Lab</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-4 pt-4">
+            <a href="projects.html" class="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition flex items-center space-x-2 glow-cyan">
+              <span>Inspect Lab &amp; Projects</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+            <a href="about.html" class="px-6 py-3 rounded-xl bg-silicon-900 hover:bg-slate-800 text-slate-200 border border-slate-700 hover:border-cyan-500/50 font-mono text-xs transition flex items-center space-x-2">
+              <i data-lucide="graduation-cap" class="w-4 h-4 text-cyan-400"></i>
+              <span>My College &amp; Lab Journey</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive 3D Silicon Microchip Canvas (5 Cols) -->
+        <div class="lg:col-span-5 relative">
+          <div class="rounded-2xl bg-silicon-900/70 border border-cyan-500/30 p-3 relative overflow-hidden shadow-2xl">
+            <!-- Top HUD Bar -->
+            <div class="flex items-center justify-between px-3 py-2 border-b border-slate-800/80 font-mono text-[11px] text-slate-400">
+              <span class="flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                <span>3D_SILICON_DIE_VIEWER.v1</span>
+              </span>
+              <span class="text-cyan-400">DRAG / HOVER TO ROTATE</span>
+            </div>
+
+            <!-- Three.js Canvas Mount Point -->
+            <div id="canvas-container" class="cursor-grab active:cursor-grabbing"></div>
+
+            <!-- Bottom HUD Telemetry -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/80 font-mono text-[11px] text-center">
+              <div class="bg-silicon-950/80 py-1.5 rounded">
+                <span class="text-slate-500 block">PACKAGE</span>
+                <span class="text-cyan-300">QFP-32 / DIE</span>
+              </div>
+              <div class="bg-silicon-950/80 py-1.5 rounded">
+                <span class="text-slate-500 block">LOGIC_STATE</span>
+                <span class="text-emerald-400">SYNTHESIZED</span>
+              </div>
+              <div class="bg-silicon-950/80 py-1.5 rounded">
+                <span class="text-slate-500 block">CLOCK</span>
+                <span class="text-amber-300">ACTIVE_SYNC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= QUICK NAVIGATION OVERVIEW (PORTAL MAP) ================= -->
+    <section class="border-t border-slate-800/80 bg-silicon-900/40 py-16">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
+          <div>
+            <span class="font-mono text-xs text-cyan-400 uppercase tracking-widest">// ARCHITECTURE MAP</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white mt-1">Explore Complete Engineering Dossier</h2>
+          </div>
+          <p class="text-xs font-mono text-slate-400 mt-2 md:mt-0">All modules synced with Admin CMS</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Module 1: Academic & Lab Journey -->
+          <a href="about.html" class="group p-6 rounded-xl bg-silicon-900/90 border border-slate-800 hover:border-cyan-500/60 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition">
+                <i data-lucide="book-open" class="w-5 h-5"></i>
+              </div>
+              <span class="font-mono text-[11px] text-cyan-400">MODULE 01</span>
+              <h3 class="text-lg font-bold text-white mt-1 group-hover:text-cyan-300 transition">Education &amp; College Journey</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Schooling milestones, B.Tech ECE subjects, hands-on hardware labs, workshops, and co-curricular engineering events.
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-cyan-400">
+              <span>Open Timeline</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+            </div>
+          </a>
+
+          <!-- Module 2: Projects & Proofs -->
+          <a href="projects.html" class="group p-6 rounded-xl bg-silicon-900/90 border border-slate-800 hover:border-emerald-500/60 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition">
+                <i data-lucide="microchip" class="w-5 h-5"></i>
+              </div>
+              <span class="font-mono text-[11px] text-emerald-400">MODULE 02</span>
+              <h3 class="text-lg font-bold text-white mt-1 group-hover:text-emerald-300 transition">Projects &amp; Lab Proofs</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Blog-style case studies of VLSI, Embedded, and Analog builds—complete with circuit schematics, photos, and videos.
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-emerald-400">
+              <span>Inspect Builds</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+            </div>
+          </a>
+
+          <!-- Module 3: Professional Experience -->
+          <a href="experience.html" class="group p-6 rounded-xl bg-silicon-900/90 border border-slate-800 hover:border-amber-500/60 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition">
+                <i data-lucide="briefcase" class="w-5 h-5"></i>
+              </div>
+              <span class="font-mono text-[11px] text-amber-400">MODULE 03</span>
+              <h3 class="text-lg font-bold text-white mt-1 group-hover:text-amber-300 transition">Professional Experience</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Internships, industrial training, real-world engineering workflows, and key technical lessons learned on the job.
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-amber-400">
+              <span>View Career Log</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+            </div>
+          </a>
+
+          <!-- Module 4: Contact & Dispatch -->
+          <a href="contact.html" class="group p-6 rounded-xl bg-silicon-900/90 border border-slate-800 hover:border-purple-500/60 transition flex flex-col justify-between">
+            <div>
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition">
+                <i data-lucide="terminal" class="w-5 h-5"></i>
+              </div>
+              <span class="font-mono text-[11px] text-purple-400">MODULE 04</span>
+              <h3 class="text-lg font-bold text-white mt-1 group-hover:text-purple-300 transition">Direct Contact &amp; Resume</h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Recruiter fast-track links, downloadable technical CV, GitHub repositories, LinkedIn, and direct communication.
+              </p>
+            </div>
+            <div class="mt-6 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono text-purple-400">
+              <span>Initialize Handshake</span>
+              <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="border-t border-slate-800/80 bg-silicon-950 py-8 px-6 text-xs font-mono text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+        <span>ABHIJEET SINGH // ECE PORTFOLIO SYSTEM</span>
+      </div>
+      <div class="flex items-center space-x-6">
+        <a href="admin.html" class="hover:text-cyan-400 transition">Admin Login</a>
+        <span>Built with Three.js &amp; Cloud CMS</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= SCRIPTS: 3D CHIP & CMS SYNC ================= -->
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Mobile Menu Toggle
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      menu.classList.toggle('hidden');
+    }
+
+    // Load Dynamic Home Content if updated from Admin Panel
+    function syncCMSContent() {
+      const savedProfile = localStorage.getItem('ece_cms_profile');
+      if (!savedProfile) return;
+      try {
+        const data = JSON.parse(savedProfile);
+        if (data.name) document.getElementById('cms-hero-title').textContent = data.name;
+        if (data.headline) document.getElementById('cms-hero-subtitle').innerHTML = data.headline;
+        if (data.bio) document.getElementById('cms-hero-bio').textContent = data.bio;
+        if (data.status) document.getElementById('cms-hero-badge').textContent = data.status;
+      } catch (e) {
+        console.error('CMS Sync Error:', e);
+      }
+    }
+    syncCMSContent();
+
+    // ================= THREE.JS 3D SILICON MICROCHIP SCENE =================
+    (function init3DChip() {
+      const container = document.getElementById('canvas-container');
+      if (!container) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 3.2, 5.5);
+      camera.lookAt(0, 0, 0);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Chip Master Group
+      const chipGroup = new THREE.Group();
+      scene.add(chipGroup);
+
+      // 1. Dark Epoxy IC Package Body
+      const bodyGeo = new THREE.BoxGeometry(2.4, 0.28, 2.4);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x0f172a,
+        roughness: 0.35,
+        metalness: 0.5
+      });
+      const chipBody = new THREE.Mesh(bodyGeo, bodyMat);
+      chipGroup.add(chipBody);
+
+      // 2. Exposed Glowing Silicon Die in the Center
+      const dieGeo = new THREE.BoxGeometry(1.3, 0.31, 1.3);
+      const dieMat = new THREE.MeshStandardMaterial({
+        color: 0x06b6d4,
+        emissive: 0x0891b2,
+        emissiveIntensity: 0.45,
+        roughness: 0.2,
+        metalness: 0.8
+      });
+      const siliconDie = new THREE.Mesh(dieGeo, dieMat);
+      chipGroup.add(siliconDie);
+
+      // 3. Wireframe Logic Grid Overlay on top of the Die
+      const gridHelper = new THREE.GridHelper(1.28, 8, 0x22d3ee, 0x10b981);
+      gridHelper.position.y = 0.165;
+      chipGroup.add(gridHelper);
+
+      // 4. Metallic IC Pins on all 4 sides
+      const pinGeo = new THREE.BoxGeometry(0.12, 0.08, 0.35);
+      const pinMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        metalness: 0.9,
+        roughness: 0.2
+      });
+
+      const pinsPerSide = 7;
+      const startOffset = -0.9;
+      const step = 0.3;
+
+      for (let i = 0; i < pinsPerSide; i++) {
+        const pos = startOffset + i * step;
+
+        // Top & Bottom Edge Pins
+        const pinFront = new THREE.Mesh(pinGeo, pinMat);
+        pinFront.position.set(pos, -0.05, 1.32);
+        chipGroup.add(pinFront);
+
+        const pinBack = new THREE.Mesh(pinGeo, pinMat);
+        pinBack.position.set(pos, -0.05, -1.32);
+        chipGroup.add(pinBack);
+
+        // Left & Right Edge Pins
+        const pinLeft = new THREE.Mesh(pinGeo, pinMat);
+        pinLeft.rotation.y = Math.PI / 2;
+        pinLeft.position.set(-1.32, -0.05, pos);
+        chipGroup.add(pinLeft);
+
+        const pinRight = new THREE.Mesh(pinGeo, pinMat);
+        pinRight.rotation.y = Math.PI / 2;
+        pinRight.position.set(1.32, -0.05, pos);
+        chipGroup.add(pinRight);
+      }
+
+      // 5. Outer Floating PCB Ring
+      const ringGeo = new THREE.RingGeometry(2.1, 2.13, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x06b6d4,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.35
+      });
+      const pcbRing = new THREE.Mesh(ringGeo, ringMat);
+      pcbRing.rotation.x = Math.PI / 2;
+      pcbRing.position.y = -0.2;
+      chipGroup.add(pcbRing);
+
+      // 6. Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const pointLight1 = new THREE.PointLight(0x06b6d4, 2.5, 15);
+      pointLight1.position.set(4, 5, 4);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0x10b981, 1.8, 15);
+      pointLight2.position.set(-4, -3, -4);
+      scene.add(pointLight2);
+
+      // Mouse Interaction State
+      let targetRotationX = 0.2;
+      let targetRotationY = 0.5;
+      let isPointerDown = false;
+
+      container.addEventListener('pointermove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        targetRotationY = x * 1.4;
+        targetRotationX = -y * 0.6 + 0.2;
+      });
+
+      // Responsive Resize
+      window.addEventListener('resize', () => {
+        if (!container) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+      });
+
+      // Animation Loop
+      let clock = new THREE.Clock();
+      function animate() {
+        requestAnimationFrame(animate);
+        const elapsed = clock.getElapsedTime();
+
+        // Smooth interpolation toward mouse + gentle idle rotation
+        chipGroup.rotation.y += (targetRotationY + elapsed * 0.35 - chipGroup.rotation.y) * 0.06;
+        chipGroup.rotation.x += (targetRotationX - chipGroup.rotation.x) * 0.06;
+        chipGroup.position.y = Math.sin(elapsed * 2) * 0.08;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>
