@@ -1,0 +1,106 @@
+{
+  "profile": {
+    "name": "Abhijeet Singh",
+    "status": "SYS_STATUS: AVAILABLE FOR CORE ECE & SILICON ROLES",
+    "headline": "Electronics & Communication Engineer — <span class='text-cyan-400'>Embedded Systems & VLSI Architecture</span>",
+    "bio": "Passionate about designing hardware from the transistor and gate level up to real-time firmware. Experienced across Digital Logic, RTL Synthesis, Microcontroller Bare-Metal Interfacing, and Analog Signal Conditioning. Every circuit, waveform, and line of code on this portal is backed by lab verification.",
+    "email": "contactabhijeetsingh04@gmail.com",
+    "phone": "+91-XXXXXXXXXX",
+    "location": "Haryana / Delhi NCR, India",
+    "resume": "",
+    "github": "https://github.com/itsabhijeetsingh",
+    "linkedin": "https://linkedin.com/in/13-abhijeet-singh"
+  },
+  "journey": [
+    {
+      "id": "j_1792691413342",
+      "type": "Co-Curricular",
+      "title": "Joint Secretary",
+      "inst": "Samarpan-The Technophilia",
+      "period": "July 2024- Sept. 2025",
+      "desc": "As Joint Secretary at Samarpan The Technophilia, I was dedicated to delivering results through strategic event planning and execution of technical workshops and sessions. My responsibilities extend to rigorous financial management, encompassing budget development, expense control, and detailed financial record-keeping and reporting.\nAdditionally, I ensure efficient logistics coordination and scheduling, alongside pro-active general club administration, all contributing to seamless operations.",
+      "proof": "https://www.linkedin.com/company/samarpan-the-technophilia"
+    },
+    {
+      "id": "j_1792691334920",
+      "type": "Graduation",
+      "title": "B.Tech in Electronics & Communication Engineering",
+      "inst": "J.C. Bose University Of Science & Technology, YMCA",
+      "period": "2022-2026",
+      "desc": "Core focus on Digital Electronics, Analog Circuits, Signals & Systems, Microprocessors & Microcontrollers, and VLSI Design.",
+      "proof": ""
+    },
+    {
+      "id": "j_1792691282877",
+      "type": "Schooling",
+      "title": "Class XII",
+      "inst": "Ascent International School, Greater Noida, UP",
+      "period": "2022",
+      "desc": "Subjects: English Core, Physics, Chemistry, Mathematics, Computer Science.\nPercentage: 81",
+      "proof": ""
+    },
+    {
+      "id": "j_1792691140621",
+      "type": "Schooling",
+      "title": "Class X",
+      "inst": "Ascent International School, Greater Noida, UP",
+      "period": "2020",
+      "desc": "Subjects: English Core, Hindi Course-B, Mathematics, Social Science, Science, Computer Application.\nPercentage: 80+",
+      "proof": ""
+    },
+    {
+      "id": "j2",
+      "type": "Lab & Subject",
+      "title": "Digital Logic, Multiplexing & Hardware Interfacing Lab",
+      "inst": "Embedded & Digital Systems Lab",
+      "period": "Core Lab Work",
+      "desc": "Hands-on experience with shift registers (74HC595), combinational/sequential logic gates, oscilloscope waveform debugging, and hand-soldering custom LED matrices.",
+      "proof": ""
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "title": "10x20 Hand-Soldered LED Matrix Arcade System (Space Invaders)",
+      "category": "Embedded",
+      "tech": "Arduino Nano, 74HC595 Shift Registers, Embedded C/C++, 200x 5mm LEDs, Piezo Buzzer",
+      "summary": "Custom-engineered a 200-node discrete 5mm LED matrix from scratch using cascaded shift registers and high-speed timer multiplexing.",
+      "body": "1. HARDWARE ARCHITECTURE:\nInstead of using pre-made addressable NeoPixel strips, I constructed a true row-column multiplexed grid by hand-soldering 200 individual 5mm LEDs (10 columns × 20 rows). Columns and rows are driven via cascaded 74HC595 Serial-In Parallel-Out (SIPO) shift registers interfaced to an Arduino Nano.\n\n2. FIRMWARE & MULTIPLEXING LOGIC:\nImplemented flicker-free persistence-of-vision (PoV) scanning by shifting bitframes at high refresh rates. Integrated tactile push-button interrupts for player movement/firing and programmed a piezo buzzer for retro sound effects.\n\n3. KEY TAKEAWAYS:\nMastered current limiting, shift-registerdaisy-chaining, ghosting elimination during row switching, and ultra-compact C byte-array framebuffers.",
+      "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
+      "video": "",
+      "github": "https://github.com"
+    },
+    {
+      "id": "p2",
+      "title": "Synthesizable Digital ALU & Finite State Machine Blocks in Verilog",
+      "category": "VLSI",
+      "tech": "Verilog HDL, RTL Synthesis, FSM Design, Testbench Waveforms, GTKWave",
+      "summary": "Designed and verified modular RTL logic cores including arithmetic units, synchronous counters, and controller state machines.",
+      "body": "1. RTL DESIGN:\nWrote clean, synthesizable Verilog HDL modules separating combinational data paths from sequential state registers. Avoided unintentional latch inference through complete case/default assignments.\n\n2. TESTBENCH & TIMING VERIFICATION:\nDeveloped self-checking testbenches to inject corner-case stimulus vectors. Inspected propagation delays, setup/hold windows, and state transitions using waveform viewers.",
+      "image": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?auto=format&fit=crop&w=900&q=80",
+      "video": "",
+      "github": "https://github.com"
+    },
+    {
+      "id": "p3",
+      "title": "Precision Analog Signal Conditioning & Active Filter Stage",
+      "category": "Analog",
+      "tech": "Op-Amps, BJT Biasing, RC Active Filters, DSO Waveform Analysis, Voltage Regulation",
+      "summary": "Designed low-noise analog amplification and active filtering circuits for clean sensor-to-ADC interfacing.",
+      "body": "1. CIRCUIT TOPOLOGY:\nEngineered multi-stage operational amplifier filters to attenuate high-frequency switching noise prior to microcontroller ADC sampling.\n\n2. LAB VERIFICATION:\nMeasured Bode frequency response, gain bandwidth product, and phase margin using a function generator and Digital Storage Oscilloscope (DSO).",
+      "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=900&q=80",
+      "video": "",
+      "github": "https://github.com"
+    }
+  ],
+  "experience": [
+    {
+      "id": "e_1792691006515",
+      "role": "GET // Engineer 2",
+      "company": "Vivo Mobile India Pvt. Ltd. [Factory Office], Greater Noida, UP",
+      "duration": "Feb. 2026 - July 2026",
+      "desc": "• Test and Maintenance Engineer (TME):\n- Handled online line maintenance, daily operational audits, and testing environment compliance to ensure seamless shop-floor execution.\n- Learned mobile testing fundamentals and executed targeted optimizations to minimize retest rates.\n- Performed systematic breakdown analysis and troubleshooting on automated machines and test equipment, driving down downtime and improving core reliability metrics (MTTR and MTBF).\n\n• Model Deputy Assistant in New Product Introduction (NPI) Team:\n- Coordinated across Cross-Functional Teams (CFT) and managed online manufacturing processes, ensuring structured tracking via Minute-of-Meeting (MOM) logs.\n- Partnered closely with senior leadership to build project management and stakeholder liaison competencies.\n- Extracted and analyzed complex operational datasets from MES and MTMS platforms to deliver actionable reporting and work analyses to the Model Deputy and manager.",
+      "proof": ""
+    }
+  ]
+}
