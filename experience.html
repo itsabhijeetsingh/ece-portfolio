@@ -318,5 +318,23 @@
       animate();
     })();
   </script>
+  <!-- GitHub Auto-Sync Engine -->
+  <script>
+    fetch('data.json?v=' + Date.now())
+      .then(res => res.json())
+      .then(data => {
+        if(data.profile) localStorage.setItem('ece_cms_profile', JSON.stringify(data.profile));
+        if(data.journey) localStorage.setItem('ece_cms_journey', JSON.stringify(data.journey));
+        if(data.projects) localStorage.setItem('ece_cms_projects', JSON.stringify(data.projects));
+        if(data.experience) localStorage.setItem('ece_cms_exp', JSON.stringify(data.experience));
+        
+        // Refresh content on the screen dynamically
+        if(typeof syncCMSContent === 'function') syncCMSContent();
+        if(typeof filterJourney === 'function') filterJourney('All');
+        if(typeof renderProjectsGrid === 'function') renderProjectsGrid();
+        if(typeof renderExpTimeline === 'function') renderExpTimeline();
+        if(typeof loadContactCMS === 'function') loadContactCMS();
+      }).catch(err => console.log('Live data loading...'));
+  </script>
 </body>
 </html>
