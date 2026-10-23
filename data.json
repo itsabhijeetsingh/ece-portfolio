@@ -1,13 +1,10 @@
 {
   "profile": {
     "name": "Abhijeet Singh",
-    "status": "SYS_STATUS: AVAILABLE FOR CORE ECE & SILICON ROLES",
-    "headline": "Electronics & Communication Engineer — <span class='text-cyan-400'>Embedded Systems & VLSI Architecture</span>",
+    "headline": "Electronics & Communication Engineer — <span class='text-cyan-400'>Embedded Systems & VLSI</span>",
     "bio": "Passionate about designing hardware from the transistor and gate level up to real-time firmware. Experienced across Digital Logic, RTL Synthesis, Microcontroller Bare-Metal Interfacing, and Analog Signal Conditioning. Every circuit, waveform, and line of code on this portal is backed by lab verification.",
     "email": "contactabhijeetsingh04@gmail.com",
-    "phone": "+91-XXXXXXXXXX",
     "location": "Haryana / Delhi NCR, India",
-    "resume": "",
     "github": "https://github.com/itsabhijeetsingh",
     "linkedin": "https://linkedin.com/in/13-abhijeet-singh"
   },
